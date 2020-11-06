@@ -5,3 +5,8 @@ h2 {
 p {
 	color: grey;
 }
+img {
+	image-rendering: crisp-edges;
+	width: 480px;
+	border: 5px solid grey;
+}
