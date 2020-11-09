@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 
 def RebinColumn( data, dim_new, mode ):
 	
@@ -68,5 +69,10 @@ def Rebin( data, shape_new, mode="avg" ):
 	return RebinColumn( data, shape_new[1], mode )
 
 
-#test_data = np.array([[50, 7, 2, 0, 1],[0, 0, 2, 8, 4],[4, 1, 1, 0, 0]])
-#print( Rebin( test_data, (6,10) ) )
+#test_data = np.array([[50.0, 7.0, 2.0, 0.0, 1.0],[0.0, 0.0, 2.0, 8.0, 4.0],[4.0, 1.0, 1.0, 0.0, 0.0]])
+
+#print( test_data.dtype )
+#print( Rebin( test_data, (3,2) ) )
+
+#test_data_scaled  = cv2.resize( test_data, (2,3), interpolation=cv2.INTER_AREA )
+#print( test_data_scaled )

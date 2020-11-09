@@ -6,11 +6,10 @@ Read and display fits files
 
 ## Issues
 * Too slow for reading large images
-* The response time shown in console is not correct when sending too many messages in a short time
 
 ## Future Work
 * Optimize the algorithm of rebinning
-* Apply protobuf to calculate the exact response time
+* Apply protobuf
 * Send arrays and display image by frontend
 * Panning
 * Backend scheduling

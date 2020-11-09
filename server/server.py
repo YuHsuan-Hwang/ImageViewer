@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+import time
 
 from datetime import datetime
 import websockets
@@ -17,8 +18,8 @@ import copy
 
 from io import BytesIO
 
-from rebin import Rebin
-
+#from rebin import Rebin
+import cv2
 
 def DrawFigure( image_data, colMap, vmin, vmax, axis_range=None ):
 
@@ -52,10 +53,11 @@ async def OneClientTask(websocket, path):
 
 		print("(", datetime.now(), ") work begin")
 
-		# read fits file
+		time1 = time.time()
 
+		# read fits file
 		hdu_list = fits.open("../client/images/member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits")
-		#hdu_list = fits.open("../client/images/vla_3ghz_msmf.fits")。#too large
+		#hdu_list = fits.open("../client/images/vla_3ghz_msmf.fits")#too large
 		#hdu_list = fits.open("../client/images/mips_24_GO3_sci_10.fits")
 
 		#hdu_list.info()
@@ -70,7 +72,9 @@ async def OneClientTask(websocket, path):
 		else:
 			print("(", datetime.now(),"image fomat does not support")
 			
-		px_size = max( x_len, y_len )
+		image_data = image_data.astype('float32')
+		#image_data = np.nan_to_num( image_data )
+		size_in_px = max( x_len, y_len )
 
 		wcs = WCS(hdu_list[0].header).celestial
 		hdu_list.close()
@@ -78,37 +82,46 @@ async def OneClientTask(websocket, path):
 		# colorbar settings
 		colMap = copy.copy( cm.get_cmap("viridis") )
 		colMap.set_bad(color='C0')
-		#vmax = np.max(image_data)
-		#vmin = np.min(image_data)
+		vmax = np.max( np.nan_to_num( image_data ) )
+		vmin = np.min( np.nan_to_num( image_data ) )
 
 		scale = 1
+		
+		time2 = time.time()
+		print( 'read fits file done, time =', (time2-time1)*60.0 , 'millisec')
 
 		# keep receiving message from the client
 		async for message in websocket:
 
+			time1 = time.time()
+
 			# screen resolution
-			x_px_size_screen, y_px_size_screen = 100,100 # should be 480*2, 480*2
-			set_dpi = max(x_px_size_screen, y_px_size_screen)
+			x_screensize_in_px, y_screensize_in_px = 100,100 # should be 480*2, 480*2
+			set_dpi = max(x_screensize_in_px, y_screensize_in_px)
 
 			# image zoom fit
 			if ( int(message)==-9999 ):
 
 				scale = 1
-				px_size_scaled = px_size
+				size_in_px_scaled = size_in_px
 
 				# rebin and draw the image
-				# the px size of the image is too small, rebin to larger px size (i.e. the screen px size)
-				if px_size<x_px_size_screen:
-					image_data_scaled = Rebin(np.nan_to_num(image_data), (x_px_size_screen, y_px_size_screen))
-					vmax = np.max(image_data_scaled)
-					vmin = np.min(image_data_scaled)
+				# image resolution is too high, rebin to low resolution (i.e. the screen size)
+				if size_in_px>x_screensize_in_px:
+					#print( np.nan_to_num(image_data).dtype )
+					#image_data_scaled = Rebin(np.nan_to_num(image_data), (x_screensize_in_px, y_screensize_in_px))
+					#print(image_data_scaled)
+					image_data_scaled = cv2.resize( image_data, (y_screensize_in_px, x_screensize_in_px), interpolation=cv2.INTER_AREA )
+					#print(image_data_scaled)
+					#vmax = np.max(image_data_scaled)
+					#vmin = np.min(image_data_scaled)
 					fig = DrawFigure( image_data_scaled, colMap, vmin, vmax )
-				# the px size of the image is large, just plot the figure without rebinning
+				# image resolution is low, plot the figure without rebinning
 				else:
-					vmax = np.max(np.nan_to_num(image_data))
-					vmin = np.min(np.nan_to_num(image_data))
+					#vmax = np.max(image_data)
+					#vmin = np.min(image_data)
 					fig = DrawFigure( image_data, colMap, vmin, vmax )
-					set_dpi = px_size
+					set_dpi = size_in_px # lower the resolution of the output figure
 
 			# image zoom in and out
 			else:
@@ -118,41 +131,46 @@ async def OneClientTask(websocket, path):
 				if scale <= 0.7: scale = 0.7
 			
 				# calcluate the new xmin and xmax
-				px_size_scaled = int( px_size / scale )
-				if px_size_scaled % 2 == 1 : px_size_scaled += 1
-				xmin = int( px_size/2-px_size_scaled/2 )
-				xmax = int( px_size/2+px_size_scaled/2-1 )
+				size_in_px_scaled = int( size_in_px / scale )
+				if size_in_px_scaled % 2 == 1 : size_in_px_scaled += 1
+				xmin = int( size_in_px/2-size_in_px_scaled/2 )
+				xmax = int( size_in_px/2+size_in_px_scaled/2-1 )
 
 				# rebin and draw the image
-				# smaller than orig image
+				# smaller than orig image, need to manage the margin of the plotting
 				if xmin<0:
 
-					# the px size of the image is too small, rebin to larger px size (i.e. the screen px size)
-					if px_size_scaled<(x_px_size_screen-2*xmin):
-						image_data_scaled = Rebin(np.nan_to_num(image_data), (x_px_size_screen+2*xmin, y_px_size_screen+2*xmin))
-						fig = DrawFigure( image_data_scaled, colMap, vmin, vmax, [xmin,x_px_size_screen+xmin,x_px_size_screen+xmin,xmin] )
-					# the px size of the image is large, just plot the figure without rebinning
+					# image resolution is too high, rebin to low resolution (i.e. the screen size)
+					if size_in_px_scaled>(x_screensize_in_px-2*xmin):
+						#image_data_scaled = Rebin(np.nan_to_num(image_data), (x_screensize_in_px+2*xmin, y_screensize_in_px+2*xmin))
+						image_data_scaled = cv2.resize(image_data, (y_screensize_in_px+2*xmin, x_screensize_in_px+2*xmin), interpolation=cv2.INTER_AREA)
+						fig = DrawFigure( image_data_scaled, colMap, vmin, vmax, [xmin,x_screensize_in_px+xmin,x_screensize_in_px+xmin,xmin] )
+					# image resolution is low, plot the figure without rebinning
 					else:
-						fig = DrawFigure( image_data, colMap, vmin, vmax, [xmin,x_px_size_screen+xmin,x_px_size_screen+xmin,xmin] )
-						set_dpi = px_size
+						fig = DrawFigure( image_data, colMap, vmin, vmax, [xmin,x_screensize_in_px+xmin,x_screensize_in_px+xmin,xmin] )
+						set_dpi = size_in_px # lower the resolution of the output figure
 
-				# larger than orig image
+				# larger than orig image, need to slice the image
 				else:
 
 					image_data_scaled = image_data[xmin:xmax:1,xmin:xmax:1] # slice the image
-					# the px size of the image is too small, rebin to larger px size (i.e. the screen px size)
-					if px_size_scaled<x_px_size_screen:
-						image_data_scaled = Rebin(np.nan_to_num(image_data_scaled), (x_px_size_screen, y_px_size_screen))
+					# image resolution is too high, rebin to low resolution (i.e. the screen size)
+					if size_in_px>x_screensize_in_px:
+						#image_data_scaled = Rebin(np.nan_to_num(image_data_scaled), (x_screensize_in_px, y_screensize_in_px))
+						image_data_scaled = cv2.resize(image_data_scaled, (y_screensize_in_px, x_screensize_in_px), interpolation=cv2.INTER_AREA)
 						fig = DrawFigure( image_data_scaled, colMap, vmin, vmax )
 					# the px size of the image is large, just plot the figure without rebinning
 					else:
 						fig = DrawFigure( image_data, colMap, vmin, vmax )
-						set_dpi = px_size
+						set_dpi = size_in_px # lower the resolution of the output figure
+
+			time2 = time.time()
+			print( 'resize and draw done, time =', (time2-time1)*60.0 , 'millisec')
 
 			# save figure to png file
 			image_png = BytesIO()
 			fig.savefig( image_png, format='png', dpi=set_dpi )
-			plt.close(fig)
+			plt.close(fig) # close the figure
 			#fig.savefig( "test.png", format='png', dpi=192 )
 
 			# encode and send

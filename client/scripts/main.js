@@ -8,7 +8,11 @@ let btnZin  = document.getElementById("btn-zin" );
 let btnZout = document.getElementById("btn-zout");
 
 let zoom_time = new Date();
-let first_onmessage = 1;
+let first_onmessage = true;
+
+let zoom_timer = false; // a timer that turn on/off zoom_fuction_call
+let zoom_function_call = false; // check if function zoom is called in a certain interval
+let zoom_interval = 100; // interval of sending zoom request
 
 // setup connection with the server
 let ws = new WebSocket("ws://localhost:5675/");
@@ -43,46 +47,57 @@ function OnChange(element) {
 ws.onmessage = function(event){
 
 	imgMain.src = event.data
-	if (first_onmessage==1){
+	if (first_onmessage==true){
 		console.log(new Date(),"image displayed, response time: ", new Date()-zoom_time, "millisec" );
-		first_onmessage = 0;
+		first_onmessage = false;
 	} else {
 		console.log(new Date(),"zoomed, response time: ", new Date()-zoom_time, "millisec" );
 	}
 };
 
+// zoom the image
+let Zoom = function(event) {
 
-function zoom(event) {
 	event.preventDefault();
-	ws.send(event.deltaY);
-	zoom_time = new Date()
+	//console.log(event.deltaMode)
+
+	// zoom if no function call in a certain interval
+	if( !zoom_function_call ){
+
+		// send zoom message to the backend
+		ws.send(event.deltaY);
+		zoom_time = new Date()
+
+		// manage the time interval
+		zoom_function_call = true; // just sent zoom message
+		window.clearTimeout(zoom_timer); // default the timer
+		zoom_timer =  window.setTimeout( "zoom_function_call = false;", zoom_interval ); // let the client send zoom message after a time interval
+		console.log(new Date(),"set zoom_function_call to false");
+
+	}else{
+		console.log(new Date(),"zoom reject");
+	}
+	
 }
 
-imgMain.onwheel = zoom;
+// response when scroll the image
+imgMain.addEventListener( "wheel", Zoom )
 
-
-// construct event of clicking the enter button
-function ZfitClick(event){
+// zoom fit button
+btnZfit.addEventListener( "click", function(event){
 	ws.send(-9999);
 	zoom_time = new Date()
-}
-// response when clicking the enter button
-btnZfit.onclick = ZfitClick;
+} );
 
-
-// construct event of clicking the enter button
-function ZinClick(event){
-  ws.send(1);
+// zoom in button
+btnZin.addEventListener( "click", function(event){
+	ws.send(10);
 	zoom_time = new Date()
-}
-// response when clicking the enter button
-btnZin.onclick = ZinClick;
+} );
 
-
-// construct event of clicking the enter button
-function ZoutClick(event){
-  ws.send(-1);
+// zoom out button
+btnZout.addEventListener( "click", function(event){
+	ws.send(-10);
 	zoom_time = new Date()
-}
-// response when clicking the enter button
-btnZout.onclick = ZoutClick;
+} );
+
