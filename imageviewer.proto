@@ -1,0 +1,25 @@
+syntax = "proto3";
+package ImageViewer;
+
+/*
+enum EventType {
+	EMPTY_EVENT = 0; // default value
+	ZOOM = 1;
+}
+*/
+
+message ZoomRequest {
+
+	//EventType event_type = 1; // let backend recognize the requested task
+
+	int64 send_start_time = 1; // the start time of sending the message
+	int32 x_screensize_in_px = 2;
+	int32 y_screensize_in_px = 3;
+	int32 zoom_deltay = 4;
+}  
+
+message ImageResponse {
+	int64 task_start_time = 1;
+	int64 send_start_time = 2;
+	string image_url = 3;
+}
