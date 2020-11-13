@@ -18,9 +18,10 @@ import copy
 
 from io import BytesIO
 
-#from rebin import Rebin
 import cv2
 
+from protobufs.imageviewer_pb2 import ZoomRequest
+from protobufs.imageviewer_pb2 import ImageResponse
 def DrawFigure( image_data, colMap, vmin, vmax, axis_range=None ):
 
 	# figure settings	
@@ -61,7 +62,7 @@ async def OneClientTask(websocket, path):
 		#hdu_list = fits.open("../client/images/mips_24_GO3_sci_10.fits")
 
 		#hdu_list.info()
-		dim = hdu_list[0].header['NAXIS']
+		dim   = hdu_list[0].header['NAXIS' ]
 		x_len = hdu_list[0].header['NAXIS1']
 		y_len = hdu_list[0].header['NAXIS2']
 		
@@ -74,7 +75,6 @@ async def OneClientTask(websocket, path):
 			
 		image_data = image_data.astype('float32')
 		#image_data = np.nan_to_num( image_data )
-		size_in_px = max( x_len, y_len )
 
 		wcs = WCS(hdu_list[0].header).celestial
 		hdu_list.close()
@@ -85,22 +85,50 @@ async def OneClientTask(websocket, path):
 		vmax = np.max( np.nan_to_num( image_data ) )
 		vmin = np.min( np.nan_to_num( image_data ) )
 
-		scale = 1
+		scale = 1.0
 		
 		time2 = time.time()
-		print( 'read fits file done, time =', (time2-time1)*60.0 , 'millisec')
+		print( "(", datetime.now(), ") read fits file done, time =", (time2-time1)*1000.0 , "millisec")
 
 		# keep receiving message from the client
-		async for message in websocket:
+		async for message_bytes in websocket:
 
+			# receive and decode the message
+			message = ZoomRequest()
+			message.ParseFromString(message_bytes)
+
+			# print send time
+			time2 = time.time()
+			print("(", datetime.now(), ") received message, send time: ", round(time2*1000.0)-message.send_start_time, "millisec" )
 			time1 = time.time()
 
+			# recognize the requested task
+			#if message.event_type == EventType.ZOOM:
+
+			print( "(", datetime.now(), ") start task: zoom image" )
+
+			# scroll amount
+			delta_y = message.zoom_deltay
+				
 			# screen resolution
-			x_screensize_in_px, y_screensize_in_px = 100,100 # should be 480*2, 480*2
-			set_dpi = max(x_screensize_in_px, y_screensize_in_px)
+			x_screensize_in_px, y_screensize_in_px = message.x_screensize_in_px, message.y_screensize_in_px # 500*2, 500*2
+			x_screensize_in_px, y_screensize_in_px = int(x_screensize_in_px/10), int(y_screensize_in_px/10) # test with lower resolution: 100, 100
+
+			print(x_screensize_in_px, y_screensize_in_px)
+
+			# fit the size of image to the y axis
+			set_dpi = y_screensize_in_px
+			size_ratio = x_len / y_len
+			screen_ratio = x_screensize_in_px / y_screensize_in_px
+
+			time2 = time.time()
+			print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
+			time1 = time.time()
+			
+			size_in_px = y_len
 
 			# image zoom fit
-			if ( int(message)==-9999 ):
+			if ( int(delta_y)==-9999 ):
 
 				scale = 1
 				size_in_px_scaled = size_in_px
@@ -108,76 +136,90 @@ async def OneClientTask(websocket, path):
 				# rebin and draw the image
 				# image resolution is too high, rebin to low resolution (i.e. the screen size)
 				if size_in_px>x_screensize_in_px:
-					#print( np.nan_to_num(image_data).dtype )
-					#image_data_scaled = Rebin(np.nan_to_num(image_data), (x_screensize_in_px, y_screensize_in_px))
-					#print(image_data_scaled)
 					image_data_scaled = cv2.resize( image_data, (y_screensize_in_px, x_screensize_in_px), interpolation=cv2.INTER_AREA )
-					#print(image_data_scaled)
-					#vmax = np.max(image_data_scaled)
-					#vmin = np.min(image_data_scaled)
+				'''
 					fig = DrawFigure( image_data_scaled, colMap, vmin, vmax )
 				# image resolution is low, plot the figure without rebinning
 				else:
-					#vmax = np.max(image_data)
-					#vmin = np.min(image_data)
 					fig = DrawFigure( image_data, colMap, vmin, vmax )
 					set_dpi = size_in_px # lower the resolution of the output figure
-
+				'''
 			# image zoom in and out
 			else:
 
 				# calculate the scale
-				scale += float(message)*0.01
+				scale += float(delta_y)*0.01
 				if scale <= 0.7: scale = 0.7
 			
+				if scale < 1.0: scale = 1.0 # turn of shrinking
+
 				# calcluate the new xmin and xmax
 				size_in_px_scaled = int( size_in_px / scale )
 				if size_in_px_scaled % 2 == 1 : size_in_px_scaled += 1
-				xmin = int( size_in_px/2-size_in_px_scaled/2 )
-				xmax = int( size_in_px/2+size_in_px_scaled/2-1 )
+				ymin = int( size_in_px/2-size_in_px_scaled/2 )
+				ymax = int( size_in_px/2+size_in_px_scaled/2-1 )
 
 				# rebin and draw the image
 				# smaller than orig image, need to manage the margin of the plotting
-				if xmin<0:
+				if ymin<0:
 
 					# image resolution is too high, rebin to low resolution (i.e. the screen size)
-					if size_in_px_scaled>(x_screensize_in_px-2*xmin):
-						#image_data_scaled = Rebin(np.nan_to_num(image_data), (x_screensize_in_px+2*xmin, y_screensize_in_px+2*xmin))
-						image_data_scaled = cv2.resize(image_data, (y_screensize_in_px+2*xmin, x_screensize_in_px+2*xmin), interpolation=cv2.INTER_AREA)
-						fig = DrawFigure( image_data_scaled, colMap, vmin, vmax, [xmin,x_screensize_in_px+xmin,x_screensize_in_px+xmin,xmin] )
+					if size_in_px_scaled>(y_screensize_in_px-2*ymin):
+						image_data_scaled = cv2.resize(image_data, (y_screensize_in_px+2*ymin, x_screensize_in_px+2*ymin), interpolation=cv2.INTER_AREA)
+					'''
+						fig = DrawFigure( image_data_scaled, colMap, vmin, vmax, [ymin,x_screensize_in_px+ymin,x_screensize_in_px+ymin,ymin] )
 					# image resolution is low, plot the figure without rebinning
 					else:
-						fig = DrawFigure( image_data, colMap, vmin, vmax, [xmin,x_screensize_in_px+xmin,x_screensize_in_px+xmin,xmin] )
+						fig = DrawFigure( image_data, colMap, vmin, vmax, [ymin,x_screensize_in_px+ymin,x_screensize_in_px+ymin,ymin] )
 						set_dpi = size_in_px # lower the resolution of the output figure
-
+					'''
 				# larger than orig image, need to slice the image
 				else:
 
-					image_data_scaled = image_data[xmin:xmax:1,xmin:xmax:1] # slice the image
+					image_data_scaled = image_data[ymin:ymax:1,ymin:ymax:1] # slice the image
 					# image resolution is too high, rebin to low resolution (i.e. the screen size)
 					if size_in_px>x_screensize_in_px:
-						#image_data_scaled = Rebin(np.nan_to_num(image_data_scaled), (x_screensize_in_px, y_screensize_in_px))
 						image_data_scaled = cv2.resize(image_data_scaled, (y_screensize_in_px, x_screensize_in_px), interpolation=cv2.INTER_AREA)
+
+					'''
 						fig = DrawFigure( image_data_scaled, colMap, vmin, vmax )
 					# the px size of the image is large, just plot the figure without rebinning
 					else:
 						fig = DrawFigure( image_data, colMap, vmin, vmax )
 						set_dpi = size_in_px # lower the resolution of the output figure
-
+					'''
 			time2 = time.time()
-			print( 'resize and draw done, time =', (time2-time1)*60.0 , 'millisec')
+			print( "(", datetime.now(), ") resize and draw done, time =", (time2-time1)*1000.0 , "millisec")
+			time1 = time.time()
 
+			'''			
 			# save figure to png file
 			image_png = BytesIO()
 			fig.savefig( image_png, format='png', dpi=set_dpi )
 			plt.close(fig) # close the figure
 			#fig.savefig( "test.png", format='png', dpi=192 )
 
-			# encode and send
+			# encode png file
 			image_url = base64.encodebytes( image_png.getvalue() )
-			await websocket.send("data:image/png;base64,"+image_url.decode('utf-8'))
+			image_url = image_url.decode('utf-8')
+			time2 = time.time()
+			print( "(", datetime.now(), ") encode png file done, time =", (time2-time1)*1000.0 , "millisec")
+			time1 = time.time()
+			'''
+			
+			# set the returning message
+			return_message = ImageResponse()
+			#return_message.image_url = "data:image/png;base64,"+image_url
+			return_message.image_data.extend( list(image_data_scaled.flatten()) )
+			return_message.image_width = image_data_scaled.shape[0]
+			return_message.image_height = image_data_scaled.shape[1]
+			return_message.task_start_time = message.send_start_time
+			return_message.send_start_time = round(time1*1000.0)
+			return_message_bytes = return_message.SerializeToString() # encode
 
-			print("(", datetime.now(), ") sent")
+			# send back message
+			await websocket.send(return_message_bytes)
+			print("(", datetime.now(), ") end task: sent image")
 
 	# listen to connection and show the number of clients when a client is disconnected
 	except websockets.exceptions.ConnectionClosed:

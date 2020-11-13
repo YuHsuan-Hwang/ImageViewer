@@ -7,6 +7,7 @@ p {
 }
 img {
 	image-rendering: crisp-edges;
-	width: 480px;
-	border: 5px solid grey;
+	width: 500px;
+	height: 500px;
+	border: 1px solid grey;
 }

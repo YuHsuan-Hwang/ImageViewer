@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x11imageviewer.proto\x12\x0bImageViewer\"s\n\x0bZoomRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x1a\n\x12x_screensize_in_px\x18\x02 \x01(\x05\x12\x1a\n\x12y_screensize_in_px\x18\x03 \x01(\x05\x12\x13\n\x0bzoom_deltay\x18\x04 \x01(\x05\"T\n\rImageResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x11\n\timage_url\x18\x03 \x01(\tb\x06proto3'
+  serialized_pb=b'\n\x11imageviewer.proto\x12\x0bImageViewer\"s\n\x0bZoomRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x1a\n\x12x_screensize_in_px\x18\x02 \x01(\x05\x12\x1a\n\x12y_screensize_in_px\x18\x03 \x01(\x05\x12\x13\n\x0bzoom_deltay\x18\x04 \x01(\x05\"\x80\x01\n\rImageResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x12\n\nimage_data\x18\x03 \x03(\x02\x12\x13\n\x0bimage_width\x18\x04 \x01(\x05\x12\x14\n\x0cimage_height\x18\x05 \x01(\x05\x62\x06proto3'
 )
 
 
@@ -101,9 +101,23 @@ _IMAGERESPONSE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='image_url', full_name='ImageViewer.ImageResponse.image_url', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='image_data', full_name='ImageViewer.ImageResponse.image_data', index=2,
+      number=3, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='image_width', full_name='ImageViewer.ImageResponse.image_width', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='image_height', full_name='ImageViewer.ImageResponse.image_height', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -119,8 +133,8 @@ _IMAGERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=151,
-  serialized_end=235,
+  serialized_start=152,
+  serialized_end=280,
 )
 
 DESCRIPTOR.message_types_by_name['ZoomRequest'] = _ZOOMREQUEST

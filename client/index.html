@@ -7,9 +7,11 @@
 	</head>
 	<body>
 		<h2>Image Viewer</h2>
-		<input type="file" onchange="OnChange(this)"/><br><br>
-		<img id="img-main"><br>
+		<div id="div-image" style="width:500px;height:500px;"></div>
+		<!--<img id="img-main"><br>-->
 		<input type="button" value="Zoom fit" id="btn-zfit"><input type="button" value="Zoom in" id="btn-zin"><input type="button" value="Zoom out" id="btn-zout">
+		<script src="scripts/protobufs/imageviewer.js"></script>
+		<script src="scripts/plotly-latest.min.js"></script>
 		<script src="scripts/main.js"></script>
 	</body>
 </html>

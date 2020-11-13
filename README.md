@@ -8,8 +8,6 @@ Read and display fits files
 * Too slow for reading large images
 
 ## Future Work
-* Optimize the algorithm of rebinning
-* Apply protobuf
-* Send arrays and display image by frontend
+* show coordinate 
 * Panning
 * Backend scheduling

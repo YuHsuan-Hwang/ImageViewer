@@ -46,7 +46,7 @@ if (goog.DEBUG && !COMPILED) {
  * @constructor
  */
 proto.ImageViewer.ImageResponse = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.ImageViewer.ImageResponse.repeatedFields_, null);
 };
 goog.inherits(proto.ImageViewer.ImageResponse, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -277,6 +277,13 @@ proto.ImageViewer.ZoomRequest.prototype.setZoomDeltay = function(value) {
 
 
 
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.ImageViewer.ImageResponse.repeatedFields_ = [3];
+
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
@@ -310,7 +317,9 @@ proto.ImageViewer.ImageResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     taskStartTime: jspb.Message.getFieldWithDefault(msg, 1, 0),
     sendStartTime: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    imageUrl: jspb.Message.getFieldWithDefault(msg, 3, "")
+    imageDataList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 3)) == null ? undefined : f,
+    imageWidth: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    imageHeight: jspb.Message.getFieldWithDefault(msg, 5, 0)
   };
 
   if (includeInstance) {
@@ -356,8 +365,16 @@ proto.ImageViewer.ImageResponse.deserializeBinaryFromReader = function(msg, read
       msg.setSendStartTime(value);
       break;
     case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setImageUrl(value);
+      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
+      msg.setImageDataList(value);
+      break;
+    case 4:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setImageWidth(value);
+      break;
+    case 5:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setImageHeight(value);
       break;
     default:
       reader.skipField();
@@ -402,10 +419,24 @@ proto.ImageViewer.ImageResponse.serializeBinaryToWriter = function(message, writ
       f
     );
   }
-  f = message.getImageUrl();
+  f = message.getImageDataList();
   if (f.length > 0) {
-    writer.writeString(
+    writer.writePackedFloat(
       3,
+      f
+    );
+  }
+  f = message.getImageWidth();
+  if (f !== 0) {
+    writer.writeInt32(
+      4,
+      f
+    );
+  }
+  f = message.getImageHeight();
+  if (f !== 0) {
+    writer.writeInt32(
+      5,
       f
     );
   }
@@ -449,20 +480,75 @@ proto.ImageViewer.ImageResponse.prototype.setSendStartTime = function(value) {
 
 
 /**
- * optional string image_url = 3;
- * @return {string}
+ * repeated float image_data = 3;
+ * @return {!Array<number>}
  */
-proto.ImageViewer.ImageResponse.prototype.getImageUrl = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+proto.ImageViewer.ImageResponse.prototype.getImageDataList = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 3));
 };
 
 
 /**
- * @param {string} value
+ * @param {!Array<number>} value
  * @return {!proto.ImageViewer.ImageResponse} returns this
  */
-proto.ImageViewer.ImageResponse.prototype.setImageUrl = function(value) {
-  return jspb.Message.setProto3StringField(this, 3, value);
+proto.ImageViewer.ImageResponse.prototype.setImageDataList = function(value) {
+  return jspb.Message.setField(this, 3, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ImageViewer.ImageResponse} returns this
+ */
+proto.ImageViewer.ImageResponse.prototype.addImageData = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 3, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ImageViewer.ImageResponse} returns this
+ */
+proto.ImageViewer.ImageResponse.prototype.clearImageDataList = function() {
+  return this.setImageDataList([]);
+};
+
+
+/**
+ * optional int32 image_width = 4;
+ * @return {number}
+ */
+proto.ImageViewer.ImageResponse.prototype.getImageWidth = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.ImageViewer.ImageResponse} returns this
+ */
+proto.ImageViewer.ImageResponse.prototype.setImageWidth = function(value) {
+  return jspb.Message.setProto3IntField(this, 4, value);
+};
+
+
+/**
+ * optional int32 image_height = 5;
+ * @return {number}
+ */
+proto.ImageViewer.ImageResponse.prototype.getImageHeight = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.ImageViewer.ImageResponse} returns this
+ */
+proto.ImageViewer.ImageResponse.prototype.setImageHeight = function(value) {
+  return jspb.Message.setProto3IntField(this, 5, value);
 };
 
 
