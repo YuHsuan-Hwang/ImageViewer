@@ -9,37 +9,11 @@ import websockets
 import asyncio
 
 from astropy.io import fits
-from astropy.wcs import WCS
-
-import base64
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import copy
-
-from io import BytesIO
 
 import cv2
 
 from protobufs.imageviewer_pb2 import ZoomRequest
 from protobufs.imageviewer_pb2 import ImageResponse
-def DrawFigure( image_data, colMap, vmin, vmax, axis_range=None ):
-
-	# figure settings	
-	fig = plt.figure()
-	fig.set_size_inches(1,1)
-	ax = plt.subplot()
-	ax.axis('off')
-	ax.set_frame_on(False)
-
-	# draw the image
-	ax.imshow(image_data, cmap=colMap, vmin=vmin, vmax=vmax)
-	if ( axis_range!=None ):
-		ax.axis( axis_range )
-	fig.tight_layout(pad=0, h_pad=0, w_pad=0)
-	ax.invert_yaxis()
-
-	return fig
-
 
 # construct the task of a client connection
 async def OneClientTask(websocket, path):
@@ -57,15 +31,24 @@ async def OneClientTask(websocket, path):
 		time1 = time.time()
 
 		# read fits file
-		hdu_list = fits.open("../client/images/member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits")
-		#hdu_list = fits.open("../client/images/vla_3ghz_msmf.fits")#too large
-		#hdu_list = fits.open("../client/images/mips_24_GO3_sci_10.fits")
+		path = "/Users/yuhsuan/Documents/web-projects/ImageViewer/client/images/"
+		filename = "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits"
+		#filename = "vla_3ghz_msmf.fits"
+		#filename = "mips_24_GO3_sci_10.fits"
+		hdu_list = fits.open(path+filename)
 
 		#hdu_list.info()
 		dim   = hdu_list[0].header['NAXIS' ]
 		x_len = hdu_list[0].header['NAXIS1']
 		y_len = hdu_list[0].header['NAXIS2']
-		
+
+		x_centerpix = hdu_list[0].header['CRPIX1']
+		y_centerpix = hdu_list[0].header['CRPIX2']
+		x_centerra  = hdu_list[0].header['CRVAL1']
+		y_centerdec = hdu_list[0].header['CRVAL2']
+		x_coordelta = hdu_list[0].header['CDELT1']
+		y_coordelta = hdu_list[0].header['CDELT2']
+
 		if dim==2:
 			image_data = hdu_list[0].data
 		elif dim==4:
@@ -73,19 +56,16 @@ async def OneClientTask(websocket, path):
 		else:
 			print("(", datetime.now(),"image fomat does not support")
 			
-		image_data = image_data.astype('float32')
-		#image_data = np.nan_to_num( image_data )
+		image_data = image_data.astype('float32') # for cv2.resize to work
 
-		wcs = WCS(hdu_list[0].header).celestial
 		hdu_list.close()
 
 		# colorbar settings
-		colMap = copy.copy( cm.get_cmap("viridis") )
-		colMap.set_bad(color='C0')
 		vmax = np.max( np.nan_to_num( image_data ) )
 		vmin = np.min( np.nan_to_num( image_data ) )
 
 		scale = 1.0
+		axis_range = [ 0, x_len-1, 0, y_len-1 ] # xmin, xmax, ymin, ymax
 		
 		time2 = time.time()
 		print( "(", datetime.now(), ") read fits file done, time =", (time2-time1)*1000.0 , "millisec")
@@ -102,9 +82,6 @@ async def OneClientTask(websocket, path):
 			print("(", datetime.now(), ") received message, send time: ", round(time2*1000.0)-message.send_start_time, "millisec" )
 			time1 = time.time()
 
-			# recognize the requested task
-			#if message.event_type == EventType.ZOOM:
-
 			print( "(", datetime.now(), ") start task: zoom image" )
 
 			# scroll amount
@@ -114,105 +91,109 @@ async def OneClientTask(websocket, path):
 			x_screensize_in_px, y_screensize_in_px = message.x_screensize_in_px, message.y_screensize_in_px # 500*2, 500*2
 			x_screensize_in_px, y_screensize_in_px = int(x_screensize_in_px/10), int(y_screensize_in_px/10) # test with lower resolution: 100, 100
 
-			print(x_screensize_in_px, y_screensize_in_px)
-
-			# fit the size of image to the y axis
-			set_dpi = y_screensize_in_px
-			size_ratio = x_len / y_len
-			screen_ratio = x_screensize_in_px / y_screensize_in_px
-
 			time2 = time.time()
 			print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
 			time1 = time.time()
+
+			if delta_y==-9999:
+				scale = 1.0
+			else:
+				scale += float(delta_y)*0.01
+				if scale <= 0.3: scale = 0.3
+
+			# calcluate the new ymin and ymax
+			rebin_ratio = 1.0
+			y_len_scaled = int( y_len / scale )
+			if y_len_scaled % 2 == 1 : y_len_scaled += 1
+			ymin = int( y_len/2-y_len_scaled/2 )
+			ymax = int( y_len/2+y_len_scaled/2-1 )
 			
-			size_in_px = y_len
+			# calculate the min of the coordinates
+			if ymin<0:
+				x_coor_min = x_centerra  - x_centerpix*x_coordelta
+				y_coor_min = y_centerdec - y_centerpix*y_coordelta
+			else:
+				x_coor_min = x_centerra  - ( x_centerpix-ymin )*x_coordelta
+				y_coor_min = y_centerdec - ( y_centerpix-ymin )*y_coordelta
+			
+			x_range_min = x_centerra  - ( x_centerpix-ymin ) * x_coordelta
+			y_range_min = y_centerdec - ( y_centerpix-ymin ) * y_coordelta
+			x_range_max = x_centerra  + ( ymax-x_centerpix ) * x_coordelta
+			y_range_max = y_centerdec + ( ymax-y_centerpix ) * y_coordelta
 
-			# image zoom fit
-			if ( int(delta_y)==-9999 ):
+			# draw the image
+			# smaller than orig image, need to manage the margin of the plotting
+			if ymin<0:
+				y_screensize_in_px_scaled = int( y_screensize_in_px * scale )
+				if y_screensize_in_px_scaled % 2 == 1 : y_screensize_in_px_scaled += 1
+				# image resolution is too high, rebin
+				if y_len>(y_screensize_in_px_scaled):
+					image_data_scaled = cv2.resize( image_data,
+													(y_screensize_in_px_scaled, y_screensize_in_px_scaled),
+													interpolation=cv2.INTER_AREA )
+					axis_range = [ ymin, y_screensize_in_px_scaled+ymin-1, ymin, y_screensize_in_px_scaled+ymin-1 ]
+					rebin_ratio = (y_screensize_in_px_scaled)/y_len
 
-				scale = 1
-				size_in_px_scaled = size_in_px
-
-				# rebin and draw the image
-				# image resolution is too high, rebin to low resolution (i.e. the screen size)
-				if size_in_px>x_screensize_in_px:
-					image_data_scaled = cv2.resize( image_data, (y_screensize_in_px, x_screensize_in_px), interpolation=cv2.INTER_AREA )
-				'''
-					fig = DrawFigure( image_data_scaled, colMap, vmin, vmax )
-				# image resolution is low, plot the figure without rebinning
 				else:
-					fig = DrawFigure( image_data, colMap, vmin, vmax )
-					set_dpi = size_in_px # lower the resolution of the output figure
-				'''
-			# image zoom in and out
+					image_data_scaled = image_data
+					axis_range = [ ymin, y_len-ymin-1, ymin, y_len-ymin-1 ]
+
+			# larger than orig image, need to slice the image
 			else:
 
-				# calculate the scale
-				scale += float(delta_y)*0.01
-				if scale <= 0.7: scale = 0.7
-			
-				if scale < 1.0: scale = 1.0 # turn of shrinking
+				image_data_scaled = image_data[ ymin:ymax+1:1, ymin:ymax+1:1 ]
 
-				# calcluate the new xmin and xmax
-				size_in_px_scaled = int( size_in_px / scale )
-				if size_in_px_scaled % 2 == 1 : size_in_px_scaled += 1
-				ymin = int( size_in_px/2-size_in_px_scaled/2 )
-				ymax = int( size_in_px/2+size_in_px_scaled/2-1 )
+				# image resolution is too high, rebin
+				if y_len_scaled>y_screensize_in_px:
+					image_data_scaled = cv2.resize( image_data_scaled,
+													(y_screensize_in_px, x_screensize_in_px),
+													interpolation=cv2.INTER_AREA )
+					axis_range = [ 0, x_screensize_in_px-1, 0, y_screensize_in_px-1 ]
+					rebin_ratio = y_screensize_in_px/y_len_scaled
 
-				# rebin and draw the image
-				# smaller than orig image, need to manage the margin of the plotting
-				if ymin<0:
-
-					# image resolution is too high, rebin to low resolution (i.e. the screen size)
-					if size_in_px_scaled>(y_screensize_in_px-2*ymin):
-						image_data_scaled = cv2.resize(image_data, (y_screensize_in_px+2*ymin, x_screensize_in_px+2*ymin), interpolation=cv2.INTER_AREA)
-					'''
-						fig = DrawFigure( image_data_scaled, colMap, vmin, vmax, [ymin,x_screensize_in_px+ymin,x_screensize_in_px+ymin,ymin] )
-					# image resolution is low, plot the figure without rebinning
-					else:
-						fig = DrawFigure( image_data, colMap, vmin, vmax, [ymin,x_screensize_in_px+ymin,x_screensize_in_px+ymin,ymin] )
-						set_dpi = size_in_px # lower the resolution of the output figure
-					'''
-				# larger than orig image, need to slice the image
 				else:
+					axis_range = [ 0, ymax-ymin, 0, ymax-ymin ]
 
-					image_data_scaled = image_data[ymin:ymax:1,ymin:ymax:1] # slice the image
-					# image resolution is too high, rebin to low resolution (i.e. the screen size)
-					if size_in_px>x_screensize_in_px:
-						image_data_scaled = cv2.resize(image_data_scaled, (y_screensize_in_px, x_screensize_in_px), interpolation=cv2.INTER_AREA)
-
-					'''
-						fig = DrawFigure( image_data_scaled, colMap, vmin, vmax )
-					# the px size of the image is large, just plot the figure without rebinning
-					else:
-						fig = DrawFigure( image_data, colMap, vmin, vmax )
-						set_dpi = size_in_px # lower the resolution of the output figure
-					'''
 			time2 = time.time()
-			print( "(", datetime.now(), ") resize and draw done, time =", (time2-time1)*1000.0 , "millisec")
+			print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
+					192*192/(time2-time1)/1000.0, "px/millisec" )
 			time1 = time.time()
 
-			'''			
-			# save figure to png file
-			image_png = BytesIO()
-			fig.savefig( image_png, format='png', dpi=set_dpi )
-			plt.close(fig) # close the figure
-			#fig.savefig( "test.png", format='png', dpi=192 )
+			# calculate the values of the coordinates
+			#x_data = np.linspace( cxmin, cxmin+x_coordelta/rebin_ratio*(image_data_scaled.shape[0]-1), num=image_data_scaled.shape[0] )
+			#y_data = np.linspace( cymin, cymin+y_coordelta/rebin_ratio*(image_data_scaled.shape[1]-1), num=image_data_scaled.shape[1] )
+			#print( x_data, len(x_data), image_data_scaled.shape[0] )
+			#print( y_data, len(y_data), image_data_scaled.shape[1] )
 
-			# encode png file
-			image_url = base64.encodebytes( image_png.getvalue() )
-			image_url = image_url.decode('utf-8')
-			time2 = time.time()
-			print( "(", datetime.now(), ") encode png file done, time =", (time2-time1)*1000.0 , "millisec")
-			time1 = time.time()
-			'''
-			
 			# set the returning message
 			return_message = ImageResponse()
-			#return_message.image_url = "data:image/png;base64,"+image_url
-			return_message.image_data.extend( list(image_data_scaled.flatten()) )
-			return_message.image_width = image_data_scaled.shape[0]
+
+			#return_message.image_data.extend( list(image_data_scaled.flatten()) )
+			
+			return_message.filename = filename
+
+			for j in range( image_data_scaled.shape[1] ):
+				row_data = return_message.image_data.add()
+				row_data.row_data.extend( image_data_scaled[j] )
+
+			return_message.image_width  = image_data_scaled.shape[0]
 			return_message.image_height = image_data_scaled.shape[1]
+			return_message.xmin = axis_range[0]
+			return_message.ymin = axis_range[2]
+			return_message.vmin = vmin
+			return_message.vmax = vmax
+
+			return_message.x_coor_min   = x_coor_min
+			return_message.x_coor_delta = x_coordelta/rebin_ratio
+			return_message.y_coor_min   = y_coor_min
+			return_message.y_coor_delta = y_coordelta/rebin_ratio
+			return_message.x_range_min = x_range_min
+			return_message.x_range_max = x_range_max
+			return_message.y_range_min = y_range_min
+			return_message.y_range_max = y_range_max
+
+			return_message.rebin_ratio = rebin_ratio
+			
 			return_message.task_start_time = message.send_start_time
 			return_message.send_start_time = round(time1*1000.0)
 			return_message_bytes = return_message.SerializeToString() # encode
@@ -220,6 +201,11 @@ async def OneClientTask(websocket, path):
 			# send back message
 			await websocket.send(return_message_bytes)
 			print("(", datetime.now(), ") end task: sent image")
+
+		# keep receiving message from the client
+		async for message_bytes in websocket:
+			print("test")
+		
 
 	# listen to connection and show the number of clients when a client is disconnected
 	except websockets.exceptions.ConnectionClosed:

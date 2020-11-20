@@ -5,9 +5,36 @@ h2 {
 p {
 	color: grey;
 }
+/*
 img {
 	image-rendering: crisp-edges;
 	width: 500px;
 	height: 500px;
 	border: 1px solid grey;
+}
+//border-radius:10px;
+*/
+#div-image {
+	border: 1px solid dodgerblue;
+}
+#txt-filename {
+	position: absolute;
+	top: 52px;
+	left: 17px;
+	color: grey;
+	font-size: 15px;
+}
+
+#div-cursor {
+	position: absolute;
+	top: 552px;
+	left: 79px;
+	background-color:black;
+	opacity: 0.3;
+}
+#txt-cursor {
+	position: absolute;
+	bottom: 5px;
+	left: 9px;
+	color:white;
 }

@@ -7,9 +7,16 @@
 	</head>
 	<body>
 		<h2>Image Viewer</h2>
-		<div id="div-image" style="width:500px;height:500px;"></div>
-		<!--<img id="img-main"><br>-->
-		<input type="button" value="Zoom fit" id="btn-zfit"><input type="button" value="Zoom in" id="btn-zin"><input type="button" value="Zoom out" id="btn-zout">
+		<div id="div-image" style="width:580px;height:600px;">
+			<output id="txt-filename">filename</output>
+			<div id="div-cursor" style="width:499px;height:30px;">
+				<output id="txt-cursor">test</output>
+			</div>
+		</div>
+		<!---->
+		<input type="button" value="Zoom fit" id="btn-zfit">
+		<input type="button" value="Zoom in" id="btn-zin">
+		<input type="button" value="Zoom out" id="btn-zout">
 		<script src="scripts/protobufs/imageviewer.js"></script>
 		<script src="scripts/plotly-latest.min.js"></script>
 		<script src="scripts/main.js"></script>

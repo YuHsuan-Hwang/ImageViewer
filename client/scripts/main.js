@@ -1,19 +1,22 @@
 'use strict';
 
 // define the elements in the webpage
-let btnOpen = document.getElementById("btn-open");
-//let imgMain = document.getElementById("img-main");
-let divImage = document.getElementById("div-image");
-let btnZfit = document.getElementById("btn-zfit");
-let btnZin  = document.getElementById("btn-zin" );
-let btnZout = document.getElementById("btn-zout");
+let divImage     = document.getElementById("div-image"    );
+let txtFilename  = document.getElementById("txt-filename" );
+let txtCursor    = document.getElementById("txt-cursor"   );
+let btnZfit      = document.getElementById("btn-zfit"     );
+let btnZin       = document.getElementById("btn-zin"      );
+let btnZout      = document.getElementById("btn-zout"     );
 
-let zoom_time = new Date();
-let first_onmessage = true;
-
-let zoom_timer = false; // a timer that turn on/off zoom_fuction_call
+let zoom_timer         = false; // a timer that turn on/off zoom_fuction_call
 let zoom_function_call = false; // check if function zoom is called in a certain interval
-let zoom_interval = 100; // interval of sending zoom request, millisec
+let zoom_interval      = 100;   // interval of sending zoom request, millisec
+let cursor_position    = [0,0]
+
+
+divImage.style.visibility = 'hidden';
+Plotly.newPlot( divImage, [{z:[[0]],type:'heatmapgl'}] );
+
 
 // setup connection with the server
 let ws = new WebSocket("ws://localhost:5675/");
@@ -52,30 +55,51 @@ ws.onmessage = function(event){
 	// print send time and total response time
 	let send_time = Date.now() - return_message.getSendStartTime();
 	let total_response_time = Date.now() - return_message.getTaskStartTime();
-	if (first_onmessage==true){
-		console.log(new Date(),"image displayed, send back time: ", send_time, "millisec, total response time: ", total_response_time, "millisec" );
-	} else {
-		console.log(new Date(),"zoomed, send back time: ", send_time, "millisec, total response time: ", total_response_time, "millisec" );
-	}
+	console.log(new Date(),"image displayed, send back time: ", 
+				send_time, "millisec, total response time: ",
+				total_response_time, "millisec",
+				192*192/total_response_time, "px/millisec" );
 
-	// display the image
-	//imgMain.src = return_message.getImageUrl();
-	//console.log(return_message);
-	//console.log(new Date(),return_message.getImageDataList());
+	// read the message
 	let width = return_message.getImageWidth();
 	let height = return_message.getImageHeight();
-	let data = [];
-	for (let i=0; i<width; i++) {
-		data.push( return_message.getImageDataList().slice(i*height, i*height+height) );
-	};
-	//console.log(data);
+	let xmin = return_message.getXmin();
+	let ymin = return_message.getYmin();
+	let vmin = return_message.getVmin();
+	let vmax = return_message.getVmax();
 
-	let layout = { 
-		autosize:false,
-		width:500, height:500,dragmode: false,
-		xaxis:{visible: false}, yaxis:{visible: false},showlegend:false,
-		margin:{l:0,r:0,b:0,t:0} }
-	Plotly.react( divImage, [ { z:data, type:'heatmap',showscale:false } ], layout );
+	let time1 = Date.now();
+	let data = new Array(height);
+	for (let i=0; i<height; i++) {
+		data[i] = return_message.getImageDataList()[i].getRowDataList();
+	}
+
+	let x_coor_min   = return_message.getXCoorMin();
+	let x_coor_delta = return_message.getXCoorDelta();
+	let y_coor_min   = return_message.getYCoorMin();
+	let y_coor_delta = return_message.getYCoorDelta();
+	let x_range_min  = return_message.getXRangeMin();
+	let x_range_max  = return_message.getXRangeMax();
+	let y_range_min  = return_message.getYRangeMin();
+	let y_range_max  = return_message.getYRangeMax();
+	let rebin_ratio  = return_message.getRebinRatio();
+
+	txtFilename.value = return_message.getFilename();
+
+	let heatmap_layout = { 
+		autosize:false, width:580, height:600, dragmode:false,
+		margin:{ l:70, r:10, b:60, t:40 },
+		xaxis:{ range:[ x_range_min, x_range_max ], title:"Right ascension", color:'royalblue', zeroline:false, showgrid:false, linecolor:'royalblue', mirror:'ticks', linewidth:2, ticks:'inside', ticklen:8, tickcolor:'royalblue' },
+		yaxis:{ range:[ y_range_min, y_range_max ], title:{text:"Declination",standoff:1000},automargin:true, color:'royalblue', zeroline:false, showgrid:false, linecolor:'royalblue', mirror:'ticks', linewidth:2, ticks:'inside', ticklen:8, tickcolor:'royalblue', tickangle:-90 },
+		paper_bgcolor:'Aliceblue',
+	}
+	// x:xdata, y:ydata,  , zsmooth:false
+	Plotly.react( divImage, [{z:data, x0:x_coor_min, dx:x_coor_delta, y0:y_coor_min, dy:y_coor_delta, type:'heatmapgl',
+							  showscale:false, zmin:vmin, zmax:vmax, zsmooth:false }],
+				  heatmap_layout, {displaylogo: false} );
+	
+	console.log(new Date(),"image displayed: ", Date.now()-time1, "millisec" )
+	divImage.style.visibility = 'visible';
 };
 
 // send zoom message
@@ -84,10 +108,8 @@ let ZoomSend = function(delta_y) {
 	// set the message
 	let message = new proto.ImageViewer.ZoomRequest();
 	//message.setEventType( 1 ); // 1 for ZOOM
-	//message.setXScreensizeInPx( imgMain.width *window.devicePixelRatio );
-	//message.setYScreensizeInPx( imgMain.height*window.devicePixelRatio );
-	message.setXScreensizeInPx( divImage.offsetWidth *window.devicePixelRatio );
-	message.setYScreensizeInPx( divImage.offsetHeight*window.devicePixelRatio );
+	message.setXScreensizeInPx( (divImage.offsetWidth-80-2) *window.devicePixelRatio ); // minus the length of axis(70px) and border(2px)
+	message.setYScreensizeInPx( (divImage.offsetHeight-100-2)*window.devicePixelRatio );
 	message.setZoomDeltay( delta_y );
 	message.setSendStartTime( Date.now() );
 	
@@ -99,7 +121,6 @@ let ZoomSend = function(delta_y) {
 }
 
 // response when scroll the image
-//imgMain.addEventListener( "wheel", function(event){
 divImage.addEventListener( "wheel", function(event){
 
 	event.preventDefault();
@@ -123,6 +144,14 @@ divImage.addEventListener( "wheel", function(event){
 		console.log(new Date(),"zoom reject");
 	}
 	
+} );
+
+
+divImage.on( 'plotly_hover', function(event){
+    event.points.map( function(data){
+		cursor_position = [ data.x, data.y ];
+		txtCursor.value = "  Position: ("+data.x.toFixed(4)+","+data.y.toFixed(4)+"), Value: "+data.z;
+	} );
 } );
 
 
