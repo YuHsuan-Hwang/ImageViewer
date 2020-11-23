@@ -5,6 +5,9 @@ h2 {
 p {
 	color: grey;
 }
+#div-container {
+	width: 1210px;
+}
 /*
 img {
 	image-rendering: crisp-edges;
@@ -16,19 +19,20 @@ img {
 */
 #div-image {
 	border: 1px solid dodgerblue;
+	float:left;
+	margin:10px;
 }
 #txt-filename {
 	position: absolute;
-	top: 52px;
-	left: 17px;
+	top: 62px;
+	left: 27px;
 	color: grey;
 	font-size: 15px;
 }
-
 #div-cursor {
 	position: absolute;
-	top: 552px;
-	left: 79px;
+	top: 562px;
+	left: 89px;
 	background-color:black;
 	opacity: 0.3;
 }
@@ -37,4 +41,35 @@ img {
 	bottom: 5px;
 	left: 9px;
 	color:white;
+}
+
+#div-diagram {
+	float:left;
+	margin:10px;
+}
+#div-histz {
+	border: 1px solid dodgerblue;
+	margin-bottom:13px;
+}
+#div-profilex {
+	border: 1px solid dodgerblue;
+	margin-bottom:13px;
+}
+#div-profiley {
+	border: 1px solid dodgerblue;
+}
+#title-histz {
+	position: absolute;
+	top: 45px;
+	left: 627px;
+}
+#title-histx {
+	position: absolute;
+	top: 250px;
+	left: 627px;
+}
+#title-histy {
+	position: absolute;
+	top: 455px;
+	left: 627px;
 }
