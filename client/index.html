@@ -7,29 +7,45 @@
 	</head>
 	<body>
 		<h2>Image Viewer</h2>
-		<div id="div-container">
-			<div id="div-image" style="width:580px;height:600px;">
-				<output id="txt-filename">filename</output>
-				<div id="div-cursor" style="width:499px;height:30px;">
-					<output id="txt-cursor">test</output>
+		<div id="div-panels">
+
+			<div id="div-left-panels">
+				<div id="div-image" style="width:580px;height:600px;">
+					<output id="txt-filename">filename</output>
+					<div id="div-cursor" style="width:499px;height:30px;">
+						<output id="txt-cursor">  Position:(,), Image:(,), Value:</output>
+					</div>
 				</div>
-			</div>
-			<div id="div-diagram" style="width:580px;height:600px;">
+
 				<div id="div-histz" style="width:580px;height:190px;">
 					<p id="title-histz">Render Configuration</p>
 				</div>
-				<div id="div-profilex" style="width:580px;height:190px;">
-					<p id="title-histx">X Profile</p>
+			</div>
+
+			<div id="div-right-panels">		
+				<div id="div-profile-x" style="width:700px;height:190px;">
+					<p id="title-profile-x">X Profile</p>
 				</div>
-				<div id="div-profiley" style="width:580px;height:190px;">
-					<p id="title-histy">Y Profile</p>
+
+				<div id="div-profile-y" style="width:700px;height:190px;">
+					<p id="title-profile-y">Y Profile</p>
+				</div>
+
+				<div id="div-profile-z" style="width:700px;height:190px;">
+					<p id="title-profile-z">Z Profile</p>
+				</div>
+
+				<div id="div-animator" style="width:700px;height:190px;">
+					<p id="title-animator">Animator</p>
+					<button id="btn-channel-first">First</button>
+					<button id="btn-channel-prev">Prev</button>
+					<button id="btn-channel-next">Next</button>
+					<button id="btn-channel-last">Last</button>
 				</div>
 			</div>
+
 		</div>
-		<!--
-		<input type="button" value="Zoom fit" id="btn-zfit">
-		<input type="button" value="Zoom in" id="btn-zin">
-		<input type="button" value="Zoom out" id="btn-zout">-->
+
 		<script src="scripts/protobufs/imageviewer.js"></script>
 		<script src="scripts/plotly-latest.min.js"></script>
 		<script src="scripts/main.js"></script>

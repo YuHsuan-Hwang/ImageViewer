@@ -1,33 +1,80 @@
 syntax = "proto3";
 package ImageViewer;
 
-message ZoomRequest {
+enum EventType {
 
-	int64 send_start_time = 1; // the start time of sending the message
-	int32 x_screensize_in_px = 2;
-	int32 y_screensize_in_px = 3;
-	int32 zoom_deltay = 4;
+	EMPTY_EVENT = 0;
+	INIT_DISPLAY = 1;
+	ZOOM = 2;
+	PROFILE = 3;
 
 }
 
-message ImageResponse {
+message Request {
 
-	int64 task_start_time = 1;
-	int64 send_start_time = 2;
+	EventType event_type = 1;
+	int64 send_start_time = 2; // the start time of sending the message
 
-	string filename = 3;
-	
-	message OneRow {
-		repeated float row_data = 1;
+	oneof request_message {
+		InitDisplayRequest init_display_request_message = 3;
+		ZoomRequest zoom_request_message = 4;
+		ProfileRequest profile_request_message = 5;
 	}
-	repeated OneRow image_data = 4;
+}
+
+message InitDisplayRequest {
+
+	int32 x_screensize_in_px = 1;
+	int32 y_screensize_in_px = 2;
+
+}
+
+message ZoomRequest {
+
+	int32 channel = 1;
+	int32 delta_y = 2;
+
+}
+
+message ProfileRequest {
+
+	int32 channel = 1;
+	int32 position_x = 2;
+	int32 position_y = 3;
+}
+
+
+message Response {
+
+	EventType event_type = 1;
+	int64 task_start_time = 2;
+	int64 send_start_time = 3; // the start time of sending the message
+
+	oneof response_message {
+		InitDisplayResponse init_display_response_message = 4;
+		ZoomResponse zoom_response_message = 5;
+		ProfileResponse profile_response_message = 6;
+	}
+}
+
+message InitDisplayResponse {
+
+	string filename = 1;
+	int32 orig_width = 2;
+	int32 orig_height = 3;
+	int32 channel_num = 4;
+
+	repeated float vmin = 5;
+	repeated float vmax = 6;
+
+	message OneRow {
+		repeated float point_data = 1;
+	}
+	repeated OneRow image_data = 7;
 	
-	int32 image_width = 5;
-	int32 image_height = 6;
-	int32 xmin = 7;
-	int32 ymin = 8;
-	float vmin = 9;
-	float vmax = 10;
+	int32 channel = 8;
+	int32 image_width = 9;
+	int32 image_height = 10;
 	
 	float x_coor_min = 11;
 	float x_coor_delta = 12;
@@ -39,5 +86,37 @@ message ImageResponse {
 	float y_range_max = 18;
 
 	float rebin_ratio = 19;
+
+}
+
+message ZoomResponse {
+
+	message OneRow {
+		repeated float point_data = 1;
+	}
+	repeated OneRow image_data = 1;
+	
+	int32 channel = 2;
+	int32 image_width = 3;
+	int32 image_height = 4;
+	
+	float x_coor_min = 5;
+	float x_coor_delta = 6;
+	float y_coor_min = 7;
+	float y_coor_delta = 8;
+	float x_range_min = 9;
+	float x_range_max = 10;
+	float y_range_min = 11;
+	float y_range_max = 12;
+
+	float rebin_ratio = 13;
+
+}
+
+message ProfileResponse {
+
+	repeated float profile_x = 1;
+	repeated float profile_y = 2;
+	repeated float profile_z = 3;
 
 }

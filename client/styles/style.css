@@ -1,31 +1,24 @@
 h2 {
 	color: grey;
 	margin: 5px;
+	margin-left: 15px;
 }
 p {
 	color: grey;
 }
-#div-container {
-	width: 1210px;
-}
-/*
-img {
-	image-rendering: crisp-edges;
-	width: 500px;
-	height: 500px;
-	border: 1px solid grey;
-}
-//border-radius:10px;
-*/
+
+#div-panels { width: 1330px; }
+#div-left-panels  { width: 580px; margin:10px; float:left; }
+#div-right-panels { width: 700px; margin:10px; float:left; }
+
 #div-image {
 	border: 1px solid dodgerblue;
-	float:left;
-	margin:10px;
+	margin-bottom:13px;
 }
 #txt-filename {
-	position: absolute;
-	top: 62px;
-	left: 27px;
+	position: relative;
+	top: -590px;
+	left: 10px;
 	color: grey;
 	font-size: 15px;
 }
@@ -43,33 +36,69 @@ img {
 	color:white;
 }
 
-#div-diagram {
-	float:left;
-	margin:10px;
-}
 #div-histz {
 	border: 1px solid dodgerblue;
-	margin-bottom:13px;
 }
-#div-profilex {
+
+#div-profile-x {
 	border: 1px solid dodgerblue;
 	margin-bottom:13px;
 }
-#div-profiley {
+#div-profile-y {
 	border: 1px solid dodgerblue;
+	margin-bottom:13px;
 }
+#div-profile-z {
+	border: 1px solid dodgerblue;
+	margin-bottom:13px;
+}
+#div-animator {
+	border: 1px solid dodgerblue;
+	background-color: aliceblue;
+}
+
 #title-histz {
-	position: absolute;
-	top: 45px;
-	left: 627px;
+	position: relative;
+	top: -195px;
+	left: 10px;
 }
-#title-histx {
-	position: absolute;
-	top: 250px;
-	left: 627px;
+#title-profile-x {
+	position: relative;
+	top: -195px;
+	left: 10px;
 }
-#title-histy {
-	position: absolute;
-	top: 455px;
-	left: 627px;
+#title-profile-y {
+	position: relative;
+	top: -195px;
+	left: 10px;
+}
+#title-profile-z {
+	position: relative;
+	top: -195px;
+	left: 10px;
+}
+#title-animator {
+	position: relative;
+	top: -5px;
+	left: 10px;
+}
+#btn-channel-first {
+	position: relative;
+	top: -5px;
+	left: 10px;
+}
+#btn-channel-prev {
+	position: relative;
+	top: -5px;
+	left: 10px;
+}
+#btn-channel-next {
+	position: relative;
+	top: -5px;
+	left: 10px;
+}
+#btn-channel-last {
+	position: relative;
+	top: -5px;
+	left: 10px;
 }

@@ -1,16 +1,5 @@
 'use strict';
 
-// define the elements in the webpage
-let divImage     = document.getElementById("div-image"    );
-let txtFilename  = document.getElementById("txt-filename" );
-let txtCursor    = document.getElementById("txt-cursor"   );
-let divHistz     = document.getElementById("div-histz"    );
-let divProfilex     = document.getElementById("div-profilex"    );
-let divProfiley     = document.getElementById("div-profiley"    );
-//let btnZfit      = document.getElementById("btn-zfit"     );
-//let btnZin       = document.getElementById("btn-zin"      );
-//let btnZout      = document.getElementById("btn-zout"     );
-
 class Session{
 
 	constructor( input_ip ){
@@ -35,32 +24,30 @@ class Session{
 		
 }
 
-class ImageDisplay{
+class View{
 
-    constructor( input_div_image, input_txt_cursor, input_div_histz, input_div_profilex, input_div_profiley ) {
+	constructor( input_div_image, input_txt_cursor, input_div_histz, input_div_profilex, input_div_profiley, input_div_profilez ) {
 
 		this.div_image = input_div_image;
 		this.txt_cursor = input_txt_cursor;
 		this.div_histz = input_div_histz;
-		this.div_profilex = input_div_profilex;
-		this.div_profiley = input_div_profiley;
-
-		this.zoom_timer = false;  // a timer that turn on/off zoom_fuction_call
-		this.zoom_function_call = false; // check if function zoom is called in a certain interval
-		this.zoom_interval = 100;   // interval of sending zoom request, millisec
-
-		this.cursor_value = [0,0,0,0,0]; // x_px, y_px, x_ra, y_dec, z_value
-		
-		this.init_image_flag = true;
+		this.div_profile_x = input_div_profilex;
+		this.div_profile_y = input_div_profiley;
+		this.div_profile_z = input_div_profilez;
 
 		this.filename;
-		this.width;
-		this.height;
-		this.xmin;
-		this.ymin;
+		this.orig_width;
+		this.orig_height;
+		this.channel_num;
+
 		this.vmin;
 		this.vmax;
 		this.data = [[0]];
+
+		this.channel = 0;
+		this.width;
+		this.height;
+
 		this.x_coor_min;
 		this.x_coor_delta;
 		this.y_coor_min;
@@ -69,11 +56,17 @@ class ImageDisplay{
 		this.x_range_max;
 		this.y_range_min;
 		this.y_range_max;
+
+		this.cursor_value = [0,0,0,0,0]; // x_px, y_px, x_ra, y_dec, z_value
 		this.rebin_ratio;
 
+		this.profile_x;
+		this.profile_y;
+		this.profile_z;
+		
 	}
-	
-	InitDisplay() {
+
+	SetupInterface() {
 		let heatmap_layout = { 
 			autosize:false, width:580, height:600, dragmode:false,
 			margin:{ l:70, r:10, b:60, t:40 },
@@ -85,27 +78,102 @@ class ImageDisplay{
 		
 		let hist_layout = {
 			autosize:false, width:580, height:190,
-			margin:{ l:50, r:150, b:40, t:40 },
+			margin:{ l:70, r:150, b:40, t:40 },
 			xaxis:{ title:"Value", color:'royalblue', linecolor:'royalblue', mirror:true },
-			yaxis:{ color:'royalblue', linecolor:'royalblue', mirror:true },
+			yaxis:{ title:"Number", color:'royalblue', linecolor:'royalblue', mirror:true },
 			paper_bgcolor:'Aliceblue'
 		}
 		
 		Plotly.react( this.div_histz, [{x:[],type:'histogram',opacity: 0.4}], hist_layout, {displaylogo: false} );
 
 		let bar_layout = {
-			autosize:false, width:580, height:190,
-			margin:{ l:50, r:10, b:40, t:40 },
+			autosize:false, width:700, height:190,
+			margin:{ l:70, r:20, b:40, t:40 },
 			xaxis:{ title:"Coordinate", color:'royalblue', linecolor:'royalblue', mirror:true },
-			yaxis:{ color:'royalblue', linecolor:'royalblue', mirror:true },
+			yaxis:{ title:"Value", color:'royalblue', linecolor:'royalblue', mirror:true },
 			paper_bgcolor:'Aliceblue', bargap:0
 		}
 
-		Plotly.react( this.div_profilex, [{y:[],type:'bar',opacity: 0.4}], bar_layout, {displaylogo: false} );
-		Plotly.react( this.div_profiley, [{y:[],type:'bar',opacity: 0.4}], bar_layout, {displaylogo: false} );
+		Plotly.react( this.div_profile_x, [{y:[],type:'bar',opacity: 0.4}], bar_layout, {displaylogo:false} );
+		Plotly.react( this.div_profile_y, [{y:[],type:'bar',opacity: 0.4}], bar_layout, {displaylogo:false} );
+		Plotly.react( this.div_profile_z, [{y:[],type:'bar',opacity: 0.4}], bar_layout, {displaylogo:false} );
 	}
 
-	WheelEvent(event,ws){
+	UpdateDisplay(channel){
+		let time1 = Date.now();
+		txtFilename.value = this.filename;
+
+
+		Plotly.update( this.div_image,
+					   { z:[this.data[channel]], x0:this.x_coor_min, dx:this.x_coor_delta, y0:this.y_coor_min, dy:this.y_coor_delta,
+						 zmin:this.vmin[channel], zmax:this.vmax[channel] },
+					   { 'xaxis.range':[this.x_range_min,this.x_range_max], 'yaxis.range':[this.y_range_min,this.y_range_max] } )
+	
+		console.log(new Date(),"image display: ", Date.now()-time1, "millisec" )
+		
+	}
+
+	UpdateHistz(channel){
+		Plotly.update( this.div_histz, {x:[this.data[channel].flat()]} );
+	}
+
+	UpdateTxtCrusor(){
+		this.txt_cursor.value = "  Position: ("+this.cursor_value[0]+","+this.cursor_value[1]
+		+"), Image: ("+this.cursor_value[2].toFixed(4)+","+this.cursor_value[3].toFixed(4)+"), Value: "
+		+this.cursor_value[4].toFixed(6);
+	}
+
+	UpdateProfile(){
+
+		Plotly.update( this.div_profile_x, { y:[this.profile_x] } );
+		Plotly.update( this.div_profile_y, { y:[this.profile_y] } );
+		Plotly.update( this.div_profile_z, { y:[this.profile_z] } );
+	}
+
+}
+
+class Controller{
+
+	constructor( input_view ) {
+
+		this.view = input_view;
+
+		this.zoom_timer = false;  // a timer that turn on/off zoom_fuction_call
+		this.zoom_function_call = false; // check if function zoom is called in a certain interval
+		this.zoom_interval = 100;   // interval of sending zoom request, millisec
+
+	}
+
+
+	// first task when connection is established
+	InitSetup(){
+
+		// draw all the interface with blanck figures
+		this.view.SetupInterface();
+
+	}
+
+	// ask backend to display initial image
+	InitDisplayRequest( ws ) {
+
+		// set the message
+		let request_message = new proto.ImageViewer.InitDisplayRequest();
+		request_message.setXScreensizeInPx( (this.view.div_image.offsetWidth-80-2)  *window.devicePixelRatio ); // minus the length of axis(70px) and border(2px)
+		request_message.setYScreensizeInPx( (this.view.div_image.offsetHeight-100-2)*window.devicePixelRatio );
+
+		let message = new proto.ImageViewer.Request();
+		message.setEventType( 1 ); // INIT_DISPLAY
+		message.setInitDisplayRequestMessage( request_message );
+		message.setSendStartTime( Date.now() );
+
+		// encode and send
+		let message_bytes = message.serializeBinary();
+		console.log(new Date(),"send message: ", message_bytes);
+		ws.send(message_bytes);
+
+	}
+
+	WheelEvent( event, ws ){
 		event.preventDefault();
 		//console.log(event.deltaMode)
 
@@ -113,7 +181,7 @@ class ImageDisplay{
 		if( !this.zoom_function_call ){
 
 			// send zoom message to the backend
-			this.ZoomSend( event.deltaY,ws );
+			this.ZoomRequest( event.deltaY,ws );
 
 			// manage the time interval
 			this.zoom_function_call = true; // just sent zoom message
@@ -133,13 +201,15 @@ class ImageDisplay{
 	}
 
 	// send zoom message
-	ZoomSend(delta_y,ws) {
+	ZoomRequest( delta_y, ws ) {
 		// set the message
-		let message = new proto.ImageViewer.ZoomRequest();
-		//message.setEventType( 1 ); // 1 for ZOOM
-		message.setXScreensizeInPx( (this.div_image.offsetWidth-80-2)  *window.devicePixelRatio ); // minus the length of axis(70px) and border(2px)
-		message.setYScreensizeInPx( (this.div_image.offsetHeight-100-2)*window.devicePixelRatio );
-		message.setZoomDeltay( delta_y );
+		let request_message = new proto.ImageViewer.ZoomRequest();
+		request_message.setChannel( this.view.channel );
+		request_message.setDeltaY( delta_y );
+
+		let message = new proto.ImageViewer.Request();
+		message.setEventType( 2 ); // ZOOM
+		message.setZoomRequestMessage( request_message );
 		message.setSendStartTime( Date.now() );
 	
 		// encode and send
@@ -148,23 +218,69 @@ class ImageDisplay{
 		ws.send(message_bytes);
 	}
 
-	HoverEvent(event) {
-		let x_px = event.points[0].pointNumber[1];
-		let y_px = event.points[0].pointNumber[0];
+	HoverEvent( event, ws ) {
+		let x_px = Math.round( event.points[0].pointNumber[1]/this.view.rebin_ratio );
+		let y_px = Math.round( event.points[0].pointNumber[0]/this.view.rebin_ratio );
+
 		let x = event.points[0].x;
 		let y = event.points[0].y;
 		let z = event.points[0].z;
-		this.cursor_value = [ x_px, y_px, x, y, z ];
-		this.txt_cursor.value = "  Position: ("+x.toFixed(4)+","+y.toFixed(4)+"), Image: ("+x_px+","+y_px+"), Value: "+z.toFixed(6);
+		this.view.cursor_value = [ x_px, y_px, x, y, z ];
 
-		this.UpdateProfilex();
+		this.view.UpdateTxtCrusor();
+		this.ProfileRequest(x_px, y_px,ws);
+	}
+
+	ProfileRequest( x_px, y_px, ws ) {
+
+		// set the message
+		let request_message = new proto.ImageViewer.ProfileRequest();
+		request_message.setPositionX( x_px );
+		request_message.setPositionY( y_px );
+
+		let message = new proto.ImageViewer.Request();
+		message.setEventType( 3 ); // PROFILE
+		message.setProfileRequestMessage( request_message );
+		message.setSendStartTime( Date.now() );
+		
+		// encode and send
+		if( ws.readyState != 0){
+			let message_bytes = message.serializeBinary();
+			ws.send(message_bytes);
+			console.log(new Date(),"send message: ", message_bytes);
+		}
+		
+	}
+
+	ChannelBtn( mode, ws ) {
+		if( mode===0 ) {
+			if ( this.view.channel!=0 ){
+				this.view.channel = 0;
+				this.ZoomRequest(0,ws);
+			}
+		} else if ( mode===9999 ) {
+			if ( this.view.channel!=this.view.channel_num-1 ){
+				this.view.channel = this.view.channel_num-1;
+				this.ZoomRequest(0,ws);
+			}
+		} else if ( mode===1 ) {
+			if ( this.view.channel!=this.view.channel_num-1 ){
+				this.view.channel += 1;
+				this.ZoomRequest(0,ws);
+			}
+		} else { // mode===-1
+			if ( this.view.channel!=0 ){
+				this.view.channel -= 1;
+				this.ZoomRequest(0,ws);
+			}
+		}
 	}
 	
-	UpdateData(raw_message) {
+	OnMessage( raw_message ) {
 
 		// receive and decode the message
 		let return_message_bytes = new Uint8Array(raw_message);
-		let return_message = proto.ImageViewer.ImageResponse.deserializeBinary(return_message_bytes);
+		let return_message = proto.ImageViewer.Response.deserializeBinary(return_message_bytes);
 
 		// print send time and total response time
 		let send_time = Date.now() - return_message.getSendStartTime();
@@ -172,272 +288,163 @@ class ImageDisplay{
 		console.log(new Date(),"image displayed, send back time: ", 
 					send_time, "millisec, total response time: ",
 					total_response_time, "millisec",
-					192*192/total_response_time, "px/millisec" );
-		
-		let time1 = Date.now();
-		// read the message
-		this.filename = return_message.getFilename();
-		this.width = return_message.getImageWidth();
-		this.height = return_message.getImageHeight();
-		this.xmin = return_message.getXmin();
-		this.ymin = return_message.getYmin();
-		this.vmin = return_message.getVmin();
-		this.vmax = return_message.getVmax();
+					this.orig_width*this.orig_height/total_response_time, "px/millisec" );
 
-		
-		let data = new Array(this.height);
-		for (let i=0; i<this.height; i++) {
-			data[i] = return_message.getImageDataList()[i].getRowDataList();
+		if ( return_message.getEventType() == 1 ){ // INIT_DISPLAY
+			this.InitDisplayResponse( return_message.getInitDisplayResponseMessage() );
+		} else if ( return_message.getEventType() == 2 ){ // ZOOM
+			this.ZoomResponse( return_message.getZoomResponseMessage() );
+		} else if ( return_message.getEventType() == 3 ){ // PROFILE
+			this.ProfileResponse( return_message.getProfileResponseMessage() );
 		}
-		this.data = data;
-		this.x_coor_min   = return_message.getXCoorMin();
-		this.x_coor_delta = return_message.getXCoorDelta();
-		this.y_coor_min   = return_message.getYCoorMin();
-		this.y_coor_delta = return_message.getYCoorDelta();
-		this.x_range_min  = return_message.getXRangeMin();
-		this.x_range_max  = return_message.getXRangeMax();
-		this.y_range_min  = return_message.getYRangeMin();
-		this.y_range_max  = return_message.getYRangeMax();
-		this.rebin_ratio  = return_message.getRebinRatio();
+
+	}
+
+	InitDisplayResponse( response_message ) {
+
+		// read the message
+		let time1 = Date.now();
+
+		this.view.filename = response_message.getFilename();
+		this.view.width = response_message.getImageWidth();
+		this.view.height = response_message.getImageHeight();
+		this.view.channel_num = response_message.getChannelNum();
+
+		this.view.vmin = response_message.getVminList();
+		this.view.vmax = response_message.getVmaxList();
+
+		let data = new Array(this.view.height);
+		for (let i=0; i<this.view.height; i++) {
+			data[i] = response_message.getImageDataList()[i].getPointDataList();
+		}
+		this.view.data[response_message.getChannel()] = data;
+
+		this.view.x_coor_min   = response_message.getXCoorMin();
+		this.view.x_coor_delta = response_message.getXCoorDelta();
+		this.view.y_coor_min   = response_message.getYCoorMin();
+		this.view.y_coor_delta = response_message.getYCoorDelta();
+		this.view.x_range_min  = response_message.getXRangeMin();
+		this.view.x_range_max  = response_message.getXRangeMax();
+		this.view.y_range_min  = response_message.getYRangeMin();
+		this.view.y_range_max  = response_message.getYRangeMax();
+
+		this.view.rebin_ratio  = response_message.getRebinRatio();
 
 		console.log(new Date(),"read message: ", Date.now()-time1, "millisec" )
+		
+		// display image
+		this.view.UpdateDisplay(response_message.getChannel());
+		this.view.UpdateHistz(response_message.getChannel());
+
 	}
 
-	UpdateDisplay(){
+	ZoomResponse( response_message ) {
+
+		// read the message
 		let time1 = Date.now();
-		txtFilename.value = this.filename;
 
-		Plotly.update( this.div_image,
-					   { z:[this.data], x0:this.x_coor_min, dx:this.x_coor_delta, y0:this.y_coor_min, dy:this.y_coor_delta,
-						 zmin:this.vmin, zmax:this.vmax },
-					   { 'xaxis.range':[this.x_range_min,this.x_range_max], 'yaxis.range':[this.y_range_min,this.y_range_max] } )
-		console.log(new Date(),"image display: ", Date.now()-time1, "millisec" )
+		this.view.width = response_message.getImageWidth();
+		this.view.height = response_message.getImageHeight();
+		this.view.channel = response_message.getChannel();
+		
+		let data = new Array(this.view.height);
+		for (let i=0; i<this.view.height; i++) {
+			data[i] = response_message.getImageDataList()[i].getPointDataList();
+		}
+		this.view.data[response_message.getChannel()] = data;
+
+		this.view.x_coor_min   = response_message.getXCoorMin();
+		this.view.x_coor_delta = response_message.getXCoorDelta();
+		this.view.y_coor_min   = response_message.getYCoorMin();
+		this.view.y_coor_delta = response_message.getYCoorDelta();
+		this.view.x_range_min  = response_message.getXRangeMin();
+		this.view.x_range_max  = response_message.getXRangeMax();
+		this.view.y_range_min  = response_message.getYRangeMin();
+		this.view.y_range_max  = response_message.getYRangeMax();
+
+		this.view.rebin_ratio  = response_message.getRebinRatio();
+
+		console.log(new Date(),"read message: ", Date.now()-time1, "millisec" )
+		
+		// display image
+		this.view.UpdateDisplay(response_message.getChannel());
+		this.view.UpdateHistz(response_message.getChannel());
+
 	}
 
-	UpdateHistz(){
-		Plotly.update( this.div_histz, {x:[this.data.flat()]} );
-	}
+	ProfileResponse( response_message ) {
 
-	UpdateProfilex(){
-		Plotly.update( this.div_profilex, { y:[this.data[ this.cursor_value[1] ]] } );
-	}
+		// read the message
+		let time1 = Date.now();
 
-	UpdateProfiley(){
-		Plotly.update( this.div_profiley, {y:[this.data.flat()]} );
+		this.view.profile_x = response_message.getProfileXList();
+		this.view.profile_y = response_message.getProfileYList();
+		this.view.profile_z = response_message.getProfileZList();
+
+		console.log(new Date(),"read message: ", Date.now()-time1, "millisec" )
+
+		// display profile
+		this.view.UpdateProfile();
+
 	}
 
 }
 
-
+// define the elements in the webpage
+let divImage     = document.getElementById( "div-image"     );
+let txtFilename  = document.getElementById( "txt-filename"  );
+let txtCursor    = document.getElementById( "txt-cursor"    );
+let divHistz     = document.getElementById( "div-histz"     );
+let divProfileX  = document.getElementById( "div-profile-x" );
+let divProfileY  = document.getElementById( "div-profile-y" );
+let divProfileZ  = document.getElementById( "div-profile-z" );
+let btnChannelFirst = document.getElementById( "btn-channel-first" );
+let btnChannelPrev  = document.getElementById( "btn-channel-prev"  );
+let btnChannelNext  = document.getElementById( "btn-channel-next"  );
+let btnChannelLast  = document.getElementById( "btn-channel-last"  );
 
 // setup image display
-let image_display = new ImageDisplay( divImage, txtCursor, divHistz, divProfilex, divProfiley );
-image_display.InitDisplay();
+let view = new View( divImage, txtCursor, divHistz, divProfileX, divProfileY, divProfileZ );
+let controller = new Controller( view );
 
 // setup connection with the server
 let session = new Session("ws://localhost:5675/");
 
+controller.InitSetup();
+
+// WebSocket events
 session.ws.onopen = function(event) {
 	session.OnOpen();
-	image_display.ZoomSend(-9999,session.ws);
+	controller.InitDisplayRequest( session.ws );
 };
 
 session.ws.onclose = function(event) { session.OnClose(event) };
 
 session.ws.onmessage = function(event) {
-
-	image_display.UpdateData(event.data);
-	image_display.UpdateDisplay();
-
-	if ( image_display.init_image_flag===true ) {
-		image_display.UpdateHistz();
-		image_display.init_image_flag=false;
-	}
+	controller.OnMessage(event.data);
 };
 
+// web element events
 // response when scroll the image
 divImage.addEventListener( 'wheel', function(event){
-	image_display.WheelEvent(event,session.ws);
+	controller.WheelEvent(event,session.ws);
 } );
 
 // response when the cursor move to different pixels
 divImage.on( 'plotly_hover', function(event){
-	image_display.HoverEvent(event);
+	controller.HoverEvent(event,session.ws);
 } );
 
-
-
-
-
-
-/*
-let zoom_timer         = false; // a timer that turn on/off zoom_fuction_call
-let zoom_function_call = false; // check if function zoom is called in a certain interval
-let zoom_interval      = 100;   // interval of sending zoom request, millisec
-let cursor_position    = [0,0]
-*/
-
-/*
-divImage.style.visibility = 'hidden';
-Plotly.newPlot( divImage, [{z:[[0]],type:'heatmapgl'}] );
-*/
-
-/*
-// setup connection with the server
-let ws = new WebSocket("ws://localhost:5675/");
-
-// update the status if the connection is opened
-ws.onopen = function(event) {
-
-	console.log(new Date(),"connection established");
-	//console.log(new Date(),"screen resolution:"+screen.width+"x"+screen.height);
-	console.log(new Date(),"screen devicePixelRatio:"+window.devicePixelRatio);
-	
-	// show the first figure
-	ZoomSend(-9999);
-
-};
-
-// update the status if the connection is closed
-ws.onclose = function(event) {
-	if (event.wasClean) {
-		console.log(new Date(),"connection closed cleanly");
-	} else {
-		console.log(new Date(),"connection lost");
-	}
-};
-
-// set the type of receiving message
-ws.binaryType = "arraybuffer";
-
-// receive message from the server
-ws.onmessage = function(event){
-
-	// receive and decode the message
-	let return_message_bytes = new Uint8Array(event.data);
-	let return_message = proto.ImageViewer.ImageResponse.deserializeBinary(return_message_bytes);
-
-	// print send time and total response time
-	let send_time = Date.now() - return_message.getSendStartTime();
-	let total_response_time = Date.now() - return_message.getTaskStartTime();
-	console.log(new Date(),"image displayed, send back time: ", 
-				send_time, "millisec, total response time: ",
-				total_response_time, "millisec",
-				192*192/total_response_time, "px/millisec" );
-
-	// read the message
-	let width = return_message.getImageWidth();
-	let height = return_message.getImageHeight();
-	let xmin = return_message.getXmin();
-	let ymin = return_message.getYmin();
-	let vmin = return_message.getVmin();
-	let vmax = return_message.getVmax();
-
-	let time1 = Date.now();
-	let data = new Array(height);
-	for (let i=0; i<height; i++) {
-		data[i] = return_message.getImageDataList()[i].getRowDataList();
-	}
-
-	let x_coor_min   = return_message.getXCoorMin();
-	let x_coor_delta = return_message.getXCoorDelta();
-	let y_coor_min   = return_message.getYCoorMin();
-	let y_coor_delta = return_message.getYCoorDelta();
-	let x_range_min  = return_message.getXRangeMin();
-	let x_range_max  = return_message.getXRangeMax();
-	let y_range_min  = return_message.getYRangeMin();
-	let y_range_max  = return_message.getYRangeMax();
-	let rebin_ratio  = return_message.getRebinRatio();
-
-	txtFilename.value = return_message.getFilename();
-
-	let heatmap_layout = { 
-		autosize:false, width:580, height:600, dragmode:false,
-		margin:{ l:70, r:10, b:60, t:40 },
-		xaxis:{ range:[ x_range_min, x_range_max ], title:"Right ascension", color:'royalblue', zeroline:false, showgrid:false, linecolor:'royalblue', mirror:'ticks', linewidth:2, ticks:'inside', ticklen:8, tickcolor:'royalblue' },
-		yaxis:{ range:[ y_range_min, y_range_max ], title:{text:"Declination",standoff:1000},automargin:true, color:'royalblue', zeroline:false, showgrid:false, linecolor:'royalblue', mirror:'ticks', linewidth:2, ticks:'inside', ticklen:8, tickcolor:'royalblue', tickangle:-90 },
-		paper_bgcolor:'Aliceblue',
-	}
-	Plotly.react( divImage, [{z:data, x0:x_coor_min, dx:x_coor_delta, y0:y_coor_min, dy:y_coor_delta, type:'heatmapgl',
-							  showscale:false, zmin:vmin, zmax:vmax, zsmooth:false }],
-				  heatmap_layout, {displaylogo: false} );
-	
-	console.log(new Date(),"image displayed: ", Date.now()-time1, "millisec" )
-	divImage.style.visibility = 'visible';
-};
-*/
-
-/*
-// send zoom message
-let ZoomSend = function(delta_y) {
-
-	// set the message
-	let message = new proto.ImageViewer.ZoomRequest();
-	//message.setEventType( 1 ); // 1 for ZOOM
-	message.setXScreensizeInPx( (divImage.offsetWidth-80-2) *window.devicePixelRatio ); // minus the length of axis(70px) and border(2px)
-	message.setYScreensizeInPx( (divImage.offsetHeight-100-2)*window.devicePixelRatio );
-	message.setZoomDeltay( delta_y );
-	message.setSendStartTime( Date.now() );
-	
-	// encode and send
-	let message_bytes = message.serializeBinary();
-	console.log(new Date(),"send message: ", message_bytes);
-	ws.send(message_bytes);
-
-}
-*/
-
-/*
-// response when scroll the image
-divImage.addEventListener( "wheel", function(event){
-
-	event.preventDefault();
-	//console.log(event.deltaMode)
-
-	// zoom if no function call in a certain interval
-	if( !zoom_function_call ){
-
-		// send zoom message to the backend
-		ZoomSend( event.deltaY );
-
-		// manage the time interval
-		zoom_function_call = true; // just sent zoom message
-		window.clearTimeout(zoom_timer); // default the timer
-		zoom_timer =  window.setTimeout( function(){
-			zoom_function_call = false;
-			console.log(new Date(),"set zoom_function_call to false");
-		}, zoom_interval ); // let the client send zoom message after a time interval
-
-	}else{
-		console.log(new Date(),"zoom reject");
-	}
-	
+// response when click button
+btnChannelFirst.addEventListener( 'click', function(event){
+	controller.ChannelBtn(0,session.ws);
 } );
-*/
-
-
-/*
-divImage.on( 'plotly_hover', function(event){
-    event.points.map( function(data){
-		cursor_position = [ data.x, data.y ];
-		txtCursor.value = "  Position: ("+data.x.toFixed(4)+","+data.y.toFixed(4)+"), Value: "+data.z;
-	} );
+btnChannelPrev.addEventListener( 'click', function(event){
+	controller.ChannelBtn(-1,session.ws);
 } );
-*/
-
-/*
-// zoom fit button
-btnZfit.addEventListener( "click", function(event){
-	ZoomSend(-9999);
+btnChannelNext.addEventListener( 'click', function(event){
+	controller.ChannelBtn(1,session.ws);
 } );
-
-// zoom in button
-btnZin.addEventListener( "click", function(event){
-	ZoomSend(10);
+btnChannelLast.addEventListener( 'click', function(event){
+	controller.ChannelBtn(9999,session.ws);
 } );
-
-// zoom out button
-btnZout.addEventListener( "click", function(event){
-	ZoomSend(-10);
-} );
-*/
