@@ -4,7 +4,7 @@ h2 {
 	margin-left: 15px;
 }
 p {
-	color: grey;
+    color: grey;
 }
 
 #div-panels { width: 1330px; }
@@ -12,93 +12,93 @@ p {
 #div-right-panels { width: 700px; margin:10px; float:left; }
 
 #div-image {
-	border: 1px solid dodgerblue;
-	margin-bottom:13px;
+    border: 1px solid dodgerblue;
+    margin-bottom:13px;
 }
 #txt-filename {
-	position: relative;
-	top: -590px;
-	left: 10px;
-	color: grey;
-	font-size: 15px;
+    position: relative;
+    top: -590px;
+    left: 10px;
+    color: grey;
+    font-size: 15px;
 }
 #div-cursor {
-	position: absolute;
-	top: 562px;
-	left: 89px;
-	background-color:black;
-	opacity: 0.3;
+    position: absolute;
+    top: 562px;
+    left: 89px;
+    background-color:black;
+    opacity: 0.3;
 }
 #txt-cursor {
-	position: absolute;
-	bottom: 5px;
-	left: 9px;
-	color:white;
+    position: absolute;
+    bottom: 5px;
+    left: 9px;
+    color:white;
 }
 
-#div-histz {
-	border: 1px solid dodgerblue;
+#div-hist {
+    border: 1px solid dodgerblue;
 }
 
 #div-profile-x {
-	border: 1px solid dodgerblue;
-	margin-bottom:13px;
+    border: 1px solid dodgerblue;
+    margin-bottom:13px;
 }
 #div-profile-y {
-	border: 1px solid dodgerblue;
-	margin-bottom:13px;
+    border: 1px solid dodgerblue;
+    margin-bottom:13px;
 }
 #div-profile-z {
-	border: 1px solid dodgerblue;
-	margin-bottom:13px;
+    border: 1px solid dodgerblue;
+    margin-bottom:13px;
 }
 #div-animator {
-	border: 1px solid dodgerblue;
-	background-color: aliceblue;
+    border: 1px solid dodgerblue;
+    background-color: aliceblue;
 }
 
-#title-histz {
-	position: relative;
-	top: -195px;
-	left: 10px;
+#title-hist {
+    position: relative;
+    top: -195px;
+    left: 10px;
 }
 #title-profile-x {
-	position: relative;
-	top: -195px;
-	left: 10px;
+    position: relative;
+    top: -195px;
+    left: 10px;
 }
 #title-profile-y {
-	position: relative;
-	top: -195px;
-	left: 10px;
+    position: relative;
+    top: -195px;
+    left: 10px;
 }
 #title-profile-z {
-	position: relative;
-	top: -195px;
-	left: 10px;
+    position: relative;
+    top: -195px;
+    left: 10px;
 }
 #title-animator {
-	position: relative;
-	top: -5px;
-	left: 10px;
+    position: relative;
+    top: -5px;
+    left: 10px;
 }
 #btn-channel-first {
-	position: relative;
-	top: -5px;
-	left: 10px;
+    position: relative;
+    top: -5px;
+    left: 10px;
 }
 #btn-channel-prev {
-	position: relative;
-	top: -5px;
-	left: 10px;
+    position: relative;
+    top: -5px;
+    left: 10px;
 }
 #btn-channel-next {
-	position: relative;
-	top: -5px;
-	left: 10px;
+    position: relative;
+    top: -5px;
+    left: 10px;
 }
 #btn-channel-last {
-	position: relative;
-	top: -5px;
-	left: 10px;
+    position: relative;
+    top: -5px;
+    left: 10px;
 }

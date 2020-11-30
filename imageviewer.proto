@@ -3,120 +3,165 @@ package ImageViewer;
 
 enum EventType {
 
-	EMPTY_EVENT = 0;
-	INIT_DISPLAY = 1;
-	ZOOM = 2;
-	PROFILE = 3;
+    EMPTY_EVENT = 0;
+    INIT_DISPLAY = 1;
+    ZOOM = 2;
+    PROFILE = 3;
+    CHANNEL = 4;
 
 }
 
 message Request {
 
-	EventType event_type = 1;
-	int64 send_start_time = 2; // the start time of sending the message
+    EventType event_type = 1;
+    int64 send_start_time = 2; // the start time of sending the message
 
-	oneof request_message {
-		InitDisplayRequest init_display_request_message = 3;
-		ZoomRequest zoom_request_message = 4;
-		ProfileRequest profile_request_message = 5;
-	}
+    oneof request_message {
+        InitDisplayRequest init_display_request_message = 3;
+        ZoomRequest zoom_request_message = 4;
+        ProfileRequest profile_request_message = 5;
+        ChannelRequest channel_request_message = 6;
+    }
 }
 
 message InitDisplayRequest {
 
-	int32 x_screensize_in_px = 1;
-	int32 y_screensize_in_px = 2;
+    int32 x_screensize_in_px = 1;
+    int32 y_screensize_in_px = 2;
 
 }
 
 message ZoomRequest {
 
-	int32 channel = 1;
-	int32 delta_y = 2;
+    int32 channel = 1;
+    int32 delta_y = 2;
 
 }
 
 message ProfileRequest {
 
-	int32 channel = 1;
-	int32 position_x = 2;
-	int32 position_y = 3;
+    int32 channel = 1;
+    int32 position_x = 2;
+    int32 position_y = 3;
+    
+}
+
+message ChannelRequest {
+
+    int32 channel = 1;
+
 }
 
 
 message Response {
 
-	EventType event_type = 1;
-	int64 task_start_time = 2;
-	int64 send_start_time = 3; // the start time of sending the message
+    EventType event_type = 1;
+    int64 task_start_time = 2;
+    int64 send_start_time = 3; // the start time of sending the message
 
-	oneof response_message {
-		InitDisplayResponse init_display_response_message = 4;
-		ZoomResponse zoom_response_message = 5;
-		ProfileResponse profile_response_message = 6;
-	}
+    oneof response_message {
+        InitDisplayResponse init_display_response_message = 4;
+        ZoomResponse zoom_response_message = 5;
+        ProfileResponse profile_response_message = 6;
+        ChannelResponse channel_response_message = 7;
+    }
+
 }
 
 message InitDisplayResponse {
 
-	string filename = 1;
-	int32 orig_width = 2;
-	int32 orig_height = 3;
-	int32 channel_num = 4;
+    string filename = 1;
+    int32 orig_width = 2;
+    int32 orig_height = 3;
+    int32 channel_num = 4;
 
-	repeated float vmin = 5;
-	repeated float vmax = 6;
+    repeated float vmin = 5;
+    repeated float vmax = 6;
 
-	message OneRow {
-		repeated float point_data = 1;
-	}
-	repeated OneRow image_data = 7;
-	
-	int32 channel = 8;
-	int32 image_width = 9;
-	int32 image_height = 10;
-	
-	float x_coor_min = 11;
-	float x_coor_delta = 12;
-	float y_coor_min = 13;
-	float y_coor_delta = 14;
-	float x_range_min = 15;
-	float x_range_max = 16;
-	float y_range_min = 17;
-	float y_range_max = 18;
+    message OneRow {
+        repeated float point_data = 1;
+    }
+    repeated OneRow image_data = 7;
 
-	float rebin_ratio = 19;
+    int32 channel = 8;
+    int32 image_width = 9;
+    int32 image_height = 10;
+
+    float x_coor_min = 11;
+    float x_coor_delta = 12;
+    float y_coor_min = 13;
+    float y_coor_delta = 14;
+    float x_range_min = 15;
+    float x_range_max = 16;
+    float y_range_min = 17;
+    float y_range_max = 18;
+
+    float xmin = 19;
+    float ymin = 20;
+    float rebin_ratio = 21;
+
+    repeated float hist_data = 22;
 
 }
 
 message ZoomResponse {
 
-	message OneRow {
-		repeated float point_data = 1;
-	}
-	repeated OneRow image_data = 1;
-	
-	int32 channel = 2;
-	int32 image_width = 3;
-	int32 image_height = 4;
-	
-	float x_coor_min = 5;
-	float x_coor_delta = 6;
-	float y_coor_min = 7;
-	float y_coor_delta = 8;
-	float x_range_min = 9;
-	float x_range_max = 10;
-	float y_range_min = 11;
-	float y_range_max = 12;
+    message OneRow {
+        repeated float point_data = 1;
+    }
+    repeated OneRow image_data = 1;
 
-	float rebin_ratio = 13;
+    int32 channel = 2;
+    int32 image_width = 3;
+    int32 image_height = 4;
+
+    float x_coor_min = 5;
+    float x_coor_delta = 6;
+    float y_coor_min = 7;
+    float y_coor_delta = 8;
+    float x_range_min = 9;
+    float x_range_max = 10;
+    float y_range_min = 11;
+    float y_range_max = 12;
+
+    float xmin = 13;
+    float ymin = 14;
+    float rebin_ratio = 15;
 
 }
 
 message ProfileResponse {
 
-	repeated float profile_x = 1;
-	repeated float profile_y = 2;
-	repeated float profile_z = 3;
+    repeated float profile_x = 1;
+    repeated float profile_y = 2;
+    repeated float profile_z = 3;
+
+}
+
+message ChannelResponse {
+
+    message OneRow {
+        repeated float point_data = 1;
+    }
+    repeated OneRow image_data = 7;
+
+    int32 channel = 8;
+    int32 image_width = 9;
+    int32 image_height = 10;
+
+    float x_coor_min = 11;
+    float x_coor_delta = 12;
+    float y_coor_min = 13;
+    float y_coor_delta = 14;
+    float x_range_min = 15;
+    float x_range_max = 16;
+    float y_range_min = 17;
+    float y_range_max = 18;
+
+    float xmin = 19;
+    float ymin = 20;
+    float rebin_ratio = 21;
+
+    repeated float hist_data = 22;
 
 }
