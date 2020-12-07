@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x11imageviewer.proto\x12\x0bImageViewer\"\xe4\x02\n\x07Request\x12*\n\nevent_type\x18\x01 \x01(\x0e\x32\x16.ImageViewer.EventType\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12G\n\x1cinit_display_request_message\x18\x03 \x01(\x0b\x32\x1f.ImageViewer.InitDisplayRequestH\x00\x12\x38\n\x14zoom_request_message\x18\x04 \x01(\x0b\x32\x18.ImageViewer.ZoomRequestH\x00\x12>\n\x17profile_request_message\x18\x05 \x01(\x0b\x32\x1b.ImageViewer.ProfileRequestH\x00\x12>\n\x17\x63hannel_request_message\x18\x06 \x01(\x0b\x32\x1b.ImageViewer.ChannelRequestH\x00\x42\x11\n\x0frequest_message\"L\n\x12InitDisplayRequest\x12\x1a\n\x12x_screensize_in_px\x18\x01 \x01(\x05\x12\x1a\n\x12y_screensize_in_px\x18\x02 \x01(\x05\"/\n\x0bZoomRequest\x12\x0f\n\x07\x63hannel\x18\x01 \x01(\x05\x12\x0f\n\x07\x64\x65lta_y\x18\x02 \x01(\x05\"I\n\x0eProfileRequest\x12\x0f\n\x07\x63hannel\x18\x01 \x01(\x05\x12\x12\n\nposition_x\x18\x02 \x01(\x05\x12\x12\n\nposition_y\x18\x03 \x01(\x05\"!\n\x0e\x43hannelRequest\x12\x0f\n\x07\x63hannel\x18\x01 \x01(\x05\"\x87\x03\n\x08Response\x12*\n\nevent_type\x18\x01 \x01(\x0e\x32\x16.ImageViewer.EventType\x12\x17\n\x0ftask_start_time\x18\x02 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x03 \x01(\x03\x12I\n\x1dinit_display_response_message\x18\x04 \x01(\x0b\x32 .ImageViewer.InitDisplayResponseH\x00\x12:\n\x15zoom_response_message\x18\x05 \x01(\x0b\x32\x19.ImageViewer.ZoomResponseH\x00\x12@\n\x18profile_response_message\x18\x06 \x01(\x0b\x32\x1c.ImageViewer.ProfileResponseH\x00\x12@\n\x18\x63hannel_response_message\x18\x07 \x01(\x0b\x32\x1c.ImageViewer.ChannelResponseH\x00\x42\x12\n\x10response_message\"\x84\x04\n\x13InitDisplayResponse\x12\x10\n\x08\x66ilename\x18\x01 \x01(\t\x12\x12\n\norig_width\x18\x02 \x01(\x05\x12\x13\n\x0borig_height\x18\x03 \x01(\x05\x12\x13\n\x0b\x63hannel_num\x18\x04 \x01(\x05\x12\x0c\n\x04vmin\x18\x05 \x03(\x02\x12\x0c\n\x04vmax\x18\x06 \x03(\x02\x12;\n\nimage_data\x18\x07 \x03(\x0b\x32\'.ImageViewer.InitDisplayResponse.OneRow\x12\x0f\n\x07\x63hannel\x18\x08 \x01(\x05\x12\x13\n\x0bimage_width\x18\t \x01(\x05\x12\x14\n\x0cimage_height\x18\n \x01(\x05\x12\x12\n\nx_coor_min\x18\x0b \x01(\x02\x12\x14\n\x0cx_coor_delta\x18\x0c \x01(\x02\x12\x12\n\ny_coor_min\x18\r \x01(\x02\x12\x14\n\x0cy_coor_delta\x18\x0e \x01(\x02\x12\x13\n\x0bx_range_min\x18\x0f \x01(\x02\x12\x13\n\x0bx_range_max\x18\x10 \x01(\x02\x12\x13\n\x0by_range_min\x18\x11 \x01(\x02\x12\x13\n\x0by_range_max\x18\x12 \x01(\x02\x12\x0c\n\x04xmin\x18\x13 \x01(\x02\x12\x0c\n\x04ymin\x18\x14 \x01(\x02\x12\x13\n\x0brebin_ratio\x18\x15 \x01(\x02\x12\x11\n\thist_data\x18\x16 \x03(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"\xf7\x02\n\x0cZoomResponse\x12\x34\n\nimage_data\x18\x01 \x03(\x0b\x32 .ImageViewer.ZoomResponse.OneRow\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\x12\x13\n\x0bimage_width\x18\x03 \x01(\x05\x12\x14\n\x0cimage_height\x18\x04 \x01(\x05\x12\x12\n\nx_coor_min\x18\x05 \x01(\x02\x12\x14\n\x0cx_coor_delta\x18\x06 \x01(\x02\x12\x12\n\ny_coor_min\x18\x07 \x01(\x02\x12\x14\n\x0cy_coor_delta\x18\x08 \x01(\x02\x12\x13\n\x0bx_range_min\x18\t \x01(\x02\x12\x13\n\x0bx_range_max\x18\n \x01(\x02\x12\x13\n\x0by_range_min\x18\x0b \x01(\x02\x12\x13\n\x0by_range_max\x18\x0c \x01(\x02\x12\x0c\n\x04xmin\x18\r \x01(\x02\x12\x0c\n\x04ymin\x18\x0e \x01(\x02\x12\x13\n\x0brebin_ratio\x18\x0f \x01(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"J\n\x0fProfileResponse\x12\x11\n\tprofile_x\x18\x01 \x03(\x02\x12\x11\n\tprofile_y\x18\x02 \x03(\x02\x12\x11\n\tprofile_z\x18\x03 \x03(\x02\"\x90\x03\n\x0f\x43hannelResponse\x12\x37\n\nimage_data\x18\x07 \x03(\x0b\x32#.ImageViewer.ChannelResponse.OneRow\x12\x0f\n\x07\x63hannel\x18\x08 \x01(\x05\x12\x13\n\x0bimage_width\x18\t \x01(\x05\x12\x14\n\x0cimage_height\x18\n \x01(\x05\x12\x12\n\nx_coor_min\x18\x0b \x01(\x02\x12\x14\n\x0cx_coor_delta\x18\x0c \x01(\x02\x12\x12\n\ny_coor_min\x18\r \x01(\x02\x12\x14\n\x0cy_coor_delta\x18\x0e \x01(\x02\x12\x13\n\x0bx_range_min\x18\x0f \x01(\x02\x12\x13\n\x0bx_range_max\x18\x10 \x01(\x02\x12\x13\n\x0by_range_min\x18\x11 \x01(\x02\x12\x13\n\x0by_range_max\x18\x12 \x01(\x02\x12\x0c\n\x04xmin\x18\x13 \x01(\x02\x12\x0c\n\x04ymin\x18\x14 \x01(\x02\x12\x13\n\x0brebin_ratio\x18\x15 \x01(\x02\x12\x11\n\thist_data\x18\x16 \x03(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02*R\n\tEventType\x12\x0f\n\x0b\x45MPTY_EVENT\x10\x00\x12\x10\n\x0cINIT_DISPLAY\x10\x01\x12\x08\n\x04ZOOM\x10\x02\x12\x0b\n\x07PROFILE\x10\x03\x12\x0b\n\x07\x43HANNEL\x10\x04\x62\x06proto3'
+  serialized_pb=b'\n\x11imageviewer.proto\x12\x0bImageViewer\"e\n\x12InitDisplayRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x1a\n\x12x_screensize_in_px\x18\x02 \x01(\x05\x12\x1a\n\x12y_screensize_in_px\x18\x03 \x01(\x05\"r\n\x0bZoomRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\x12\x0c\n\x04xmin\x18\x03 \x01(\x05\x12\x0c\n\x04ymin\x18\x04 \x01(\x05\x12\r\n\x05width\x18\x05 \x01(\x05\x12\x0e\n\x06height\x18\x06 \x01(\x05\"b\n\x0eProfileRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\x12\x12\n\nposition_x\x18\x03 \x01(\x05\x12\x12\n\nposition_y\x18\x04 \x01(\x05\":\n\x0e\x43hannelRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\"\xc9\x03\n\x13InitDisplayResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\x12\x12\n\norig_width\x18\x04 \x01(\x05\x12\x13\n\x0borig_height\x18\x05 \x01(\x05\x12\x13\n\x0b\x63hannel_num\x18\x06 \x01(\x05\x12\x0c\n\x04vmin\x18\x07 \x03(\x02\x12\x0c\n\x04vmax\x18\x08 \x03(\x02\x12;\n\nimage_data\x18\t \x03(\x0b\x32\'.ImageViewer.InitDisplayResponse.OneRow\x12\x13\n\x0bimage_width\x18\n \x01(\x05\x12\x14\n\x0cimage_height\x18\x0b \x01(\x05\x12\x17\n\x0forig_x_coor_min\x18\x0c \x01(\x02\x12\x19\n\x11orig_x_coor_delta\x18\r \x01(\x02\x12\x17\n\x0forig_y_coor_min\x18\x0e \x01(\x02\x12\x19\n\x11orig_y_coor_delta\x18\x0f \x01(\x02\x12\x13\n\x0brebin_ratio\x18\x10 \x01(\x02\x12\x11\n\thist_data\x18\x11 \x03(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"\xe5\x01\n\x0cZoomResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x34\n\nimage_data\x18\x03 \x03(\x0b\x32 .ImageViewer.ZoomResponse.OneRow\x12\x0f\n\x07\x63hannel\x18\x04 \x01(\x05\x12\x13\n\x0bimage_width\x18\x05 \x01(\x05\x12\x14\n\x0cimage_height\x18\x06 \x01(\x05\x12\x13\n\x0brebin_ratio\x18\x07 \x01(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"|\n\x0fProfileResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x11\n\tprofile_x\x18\x03 \x03(\x02\x12\x11\n\tprofile_y\x18\x04 \x03(\x02\x12\x11\n\tprofile_z\x18\x05 \x03(\x02\"\xfe\x01\n\x0f\x43hannelResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x37\n\nimage_data\x18\x03 \x03(\x0b\x32#.ImageViewer.ChannelResponse.OneRow\x12\x0f\n\x07\x63hannel\x18\x04 \x01(\x05\x12\x13\n\x0bimage_width\x18\x05 \x01(\x05\x12\x14\n\x0cimage_height\x18\x06 \x01(\x05\x12\x13\n\x0brebin_ratio\x18\x07 \x01(\x02\x12\x11\n\thist_data\x18\x08 \x03(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02*R\n\tEventType\x12\x0f\n\x0b\x45MPTY_EVENT\x10\x00\x12\x10\n\x0cINIT_DISPLAY\x10\x01\x12\x08\n\x04ZOOM\x10\x02\x12\x0b\n\x07PROFILE\x10\x03\x12\x0b\n\x07\x43HANNEL\x10\x04\x62\x06proto3'
 )
 
 _EVENTTYPE = _descriptor.EnumDescriptor(
@@ -58,8 +58,8 @@ _EVENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2400,
-  serialized_end=2482,
+  serialized_start=1488,
+  serialized_end=1570,
 )
 _sym_db.RegisterEnumDescriptor(_EVENTTYPE)
 
@@ -72,78 +72,6 @@ CHANNEL = 4
 
 
 
-_REQUEST = _descriptor.Descriptor(
-  name='Request',
-  full_name='ImageViewer.Request',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='event_type', full_name='ImageViewer.Request.event_type', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='send_start_time', full_name='ImageViewer.Request.send_start_time', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='init_display_request_message', full_name='ImageViewer.Request.init_display_request_message', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='zoom_request_message', full_name='ImageViewer.Request.zoom_request_message', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='profile_request_message', full_name='ImageViewer.Request.profile_request_message', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='channel_request_message', full_name='ImageViewer.Request.channel_request_message', index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='request_message', full_name='ImageViewer.Request.request_message',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=35,
-  serialized_end=391,
-)
-
-
 _INITDISPLAYREQUEST = _descriptor.Descriptor(
   name='InitDisplayRequest',
   full_name='ImageViewer.InitDisplayRequest',
@@ -153,99 +81,21 @@ _INITDISPLAYREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='x_screensize_in_px', full_name='ImageViewer.InitDisplayRequest.x_screensize_in_px', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      name='send_start_time', full_name='ImageViewer.InitDisplayRequest.send_start_time', index=0,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='y_screensize_in_px', full_name='ImageViewer.InitDisplayRequest.y_screensize_in_px', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=393,
-  serialized_end=469,
-)
-
-
-_ZOOMREQUEST = _descriptor.Descriptor(
-  name='ZoomRequest',
-  full_name='ImageViewer.ZoomRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='channel', full_name='ImageViewer.ZoomRequest.channel', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='delta_y', full_name='ImageViewer.ZoomRequest.delta_y', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=471,
-  serialized_end=518,
-)
-
-
-_PROFILEREQUEST = _descriptor.Descriptor(
-  name='ProfileRequest',
-  full_name='ImageViewer.ProfileRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='channel', full_name='ImageViewer.ProfileRequest.channel', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='position_x', full_name='ImageViewer.ProfileRequest.position_x', index=1,
+      name='x_screensize_in_px', full_name='ImageViewer.InitDisplayRequest.x_screensize_in_px', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='position_y', full_name='ImageViewer.ProfileRequest.position_y', index=2,
+      name='y_screensize_in_px', full_name='ImageViewer.InitDisplayRequest.y_screensize_in_px', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -263,8 +113,128 @@ _PROFILEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=520,
-  serialized_end=593,
+  serialized_start=34,
+  serialized_end=135,
+)
+
+
+_ZOOMREQUEST = _descriptor.Descriptor(
+  name='ZoomRequest',
+  full_name='ImageViewer.ZoomRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='send_start_time', full_name='ImageViewer.ZoomRequest.send_start_time', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='channel', full_name='ImageViewer.ZoomRequest.channel', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='xmin', full_name='ImageViewer.ZoomRequest.xmin', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ymin', full_name='ImageViewer.ZoomRequest.ymin', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='width', full_name='ImageViewer.ZoomRequest.width', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='height', full_name='ImageViewer.ZoomRequest.height', index=5,
+      number=6, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=137,
+  serialized_end=251,
+)
+
+
+_PROFILEREQUEST = _descriptor.Descriptor(
+  name='ProfileRequest',
+  full_name='ImageViewer.ProfileRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='send_start_time', full_name='ImageViewer.ProfileRequest.send_start_time', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='channel', full_name='ImageViewer.ProfileRequest.channel', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='position_x', full_name='ImageViewer.ProfileRequest.position_x', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='position_y', full_name='ImageViewer.ProfileRequest.position_y', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=253,
+  serialized_end=351,
 )
 
 
@@ -277,8 +247,15 @@ _CHANNELREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='channel', full_name='ImageViewer.ChannelRequest.channel', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      name='send_start_time', full_name='ImageViewer.ChannelRequest.send_start_time', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='channel', full_name='ImageViewer.ChannelRequest.channel', index=1,
+      number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -295,87 +272,8 @@ _CHANNELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=595,
-  serialized_end=628,
-)
-
-
-_RESPONSE = _descriptor.Descriptor(
-  name='Response',
-  full_name='ImageViewer.Response',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='event_type', full_name='ImageViewer.Response.event_type', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='task_start_time', full_name='ImageViewer.Response.task_start_time', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='send_start_time', full_name='ImageViewer.Response.send_start_time', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='init_display_response_message', full_name='ImageViewer.Response.init_display_response_message', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='zoom_response_message', full_name='ImageViewer.Response.zoom_response_message', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='profile_response_message', full_name='ImageViewer.Response.profile_response_message', index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='channel_response_message', full_name='ImageViewer.Response.channel_response_message', index=6,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='response_message', full_name='ImageViewer.Response.response_message',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=631,
-  serialized_end=1022,
+  serialized_start=353,
+  serialized_end=411,
 )
 
 
@@ -406,8 +304,8 @@ _INITDISPLAYRESPONSE_ONEROW = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1513,
-  serialized_end=1541,
+  serialized_start=843,
+  serialized_end=871,
 )
 
 _INITDISPLAYRESPONSE = _descriptor.Descriptor(
@@ -419,155 +317,120 @@ _INITDISPLAYRESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='filename', full_name='ImageViewer.InitDisplayResponse.filename', index=0,
-      number=1, type=9, cpp_type=9, label=1,
+      name='task_start_time', full_name='ImageViewer.InitDisplayResponse.task_start_time', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='send_start_time', full_name='ImageViewer.InitDisplayResponse.send_start_time', index=1,
+      number=2, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='filename', full_name='ImageViewer.InitDisplayResponse.filename', index=2,
+      number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='orig_width', full_name='ImageViewer.InitDisplayResponse.orig_width', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='orig_height', full_name='ImageViewer.InitDisplayResponse.orig_height', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='channel_num', full_name='ImageViewer.InitDisplayResponse.channel_num', index=3,
+      name='orig_width', full_name='ImageViewer.InitDisplayResponse.orig_width', index=3,
       number=4, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='vmin', full_name='ImageViewer.InitDisplayResponse.vmin', index=4,
-      number=5, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='vmax', full_name='ImageViewer.InitDisplayResponse.vmax', index=5,
-      number=6, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='image_data', full_name='ImageViewer.InitDisplayResponse.image_data', index=6,
-      number=7, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='channel', full_name='ImageViewer.InitDisplayResponse.channel', index=7,
-      number=8, type=5, cpp_type=1, label=1,
+      name='orig_height', full_name='ImageViewer.InitDisplayResponse.orig_height', index=4,
+      number=5, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='image_width', full_name='ImageViewer.InitDisplayResponse.image_width', index=8,
-      number=9, type=5, cpp_type=1, label=1,
+      name='channel_num', full_name='ImageViewer.InitDisplayResponse.channel_num', index=5,
+      number=6, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='image_height', full_name='ImageViewer.InitDisplayResponse.image_height', index=9,
+      name='vmin', full_name='ImageViewer.InitDisplayResponse.vmin', index=6,
+      number=7, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='vmax', full_name='ImageViewer.InitDisplayResponse.vmax', index=7,
+      number=8, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='image_data', full_name='ImageViewer.InitDisplayResponse.image_data', index=8,
+      number=9, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='image_width', full_name='ImageViewer.InitDisplayResponse.image_width', index=9,
       number=10, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='x_coor_min', full_name='ImageViewer.InitDisplayResponse.x_coor_min', index=10,
-      number=11, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      name='image_height', full_name='ImageViewer.InitDisplayResponse.image_height', index=10,
+      number=11, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='x_coor_delta', full_name='ImageViewer.InitDisplayResponse.x_coor_delta', index=11,
+      name='orig_x_coor_min', full_name='ImageViewer.InitDisplayResponse.orig_x_coor_min', index=11,
       number=12, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='y_coor_min', full_name='ImageViewer.InitDisplayResponse.y_coor_min', index=12,
+      name='orig_x_coor_delta', full_name='ImageViewer.InitDisplayResponse.orig_x_coor_delta', index=12,
       number=13, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='y_coor_delta', full_name='ImageViewer.InitDisplayResponse.y_coor_delta', index=13,
+      name='orig_y_coor_min', full_name='ImageViewer.InitDisplayResponse.orig_y_coor_min', index=13,
       number=14, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='x_range_min', full_name='ImageViewer.InitDisplayResponse.x_range_min', index=14,
+      name='orig_y_coor_delta', full_name='ImageViewer.InitDisplayResponse.orig_y_coor_delta', index=14,
       number=15, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='x_range_max', full_name='ImageViewer.InitDisplayResponse.x_range_max', index=15,
+      name='rebin_ratio', full_name='ImageViewer.InitDisplayResponse.rebin_ratio', index=15,
       number=16, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='y_range_min', full_name='ImageViewer.InitDisplayResponse.y_range_min', index=16,
-      number=17, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y_range_max', full_name='ImageViewer.InitDisplayResponse.y_range_max', index=17,
-      number=18, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='xmin', full_name='ImageViewer.InitDisplayResponse.xmin', index=18,
-      number=19, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='ymin', full_name='ImageViewer.InitDisplayResponse.ymin', index=19,
-      number=20, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='rebin_ratio', full_name='ImageViewer.InitDisplayResponse.rebin_ratio', index=20,
-      number=21, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hist_data', full_name='ImageViewer.InitDisplayResponse.hist_data', index=21,
-      number=22, type=2, cpp_type=6, label=3,
+      name='hist_data', full_name='ImageViewer.InitDisplayResponse.hist_data', index=16,
+      number=17, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -584,8 +447,8 @@ _INITDISPLAYRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1025,
-  serialized_end=1541,
+  serialized_start=414,
+  serialized_end=871,
 )
 
 
@@ -616,8 +479,8 @@ _ZOOMRESPONSE_ONEROW = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1513,
-  serialized_end=1541,
+  serialized_start=843,
+  serialized_end=871,
 )
 
 _ZOOMRESPONSE = _descriptor.Descriptor(
@@ -629,106 +492,50 @@ _ZOOMRESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='image_data', full_name='ImageViewer.ZoomResponse.image_data', index=0,
-      number=1, type=11, cpp_type=10, label=3,
+      name='task_start_time', full_name='ImageViewer.ZoomResponse.task_start_time', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='send_start_time', full_name='ImageViewer.ZoomResponse.send_start_time', index=1,
+      number=2, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='image_data', full_name='ImageViewer.ZoomResponse.image_data', index=2,
+      number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='channel', full_name='ImageViewer.ZoomResponse.channel', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='image_width', full_name='ImageViewer.ZoomResponse.image_width', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='image_height', full_name='ImageViewer.ZoomResponse.image_height', index=3,
+      name='channel', full_name='ImageViewer.ZoomResponse.channel', index=3,
       number=4, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='x_coor_min', full_name='ImageViewer.ZoomResponse.x_coor_min', index=4,
-      number=5, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      name='image_width', full_name='ImageViewer.ZoomResponse.image_width', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='x_coor_delta', full_name='ImageViewer.ZoomResponse.x_coor_delta', index=5,
-      number=6, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      name='image_height', full_name='ImageViewer.ZoomResponse.image_height', index=5,
+      number=6, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='y_coor_min', full_name='ImageViewer.ZoomResponse.y_coor_min', index=6,
+      name='rebin_ratio', full_name='ImageViewer.ZoomResponse.rebin_ratio', index=6,
       number=7, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y_coor_delta', full_name='ImageViewer.ZoomResponse.y_coor_delta', index=7,
-      number=8, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='x_range_min', full_name='ImageViewer.ZoomResponse.x_range_min', index=8,
-      number=9, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='x_range_max', full_name='ImageViewer.ZoomResponse.x_range_max', index=9,
-      number=10, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y_range_min', full_name='ImageViewer.ZoomResponse.y_range_min', index=10,
-      number=11, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y_range_max', full_name='ImageViewer.ZoomResponse.y_range_max', index=11,
-      number=12, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='xmin', full_name='ImageViewer.ZoomResponse.xmin', index=12,
-      number=13, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='ymin', full_name='ImageViewer.ZoomResponse.ymin', index=13,
-      number=14, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='rebin_ratio', full_name='ImageViewer.ZoomResponse.rebin_ratio', index=14,
-      number=15, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -745,8 +552,8 @@ _ZOOMRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1544,
-  serialized_end=1919,
+  serialized_start=874,
+  serialized_end=1103,
 )
 
 
@@ -759,22 +566,36 @@ _PROFILERESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='profile_x', full_name='ImageViewer.ProfileResponse.profile_x', index=0,
-      number=1, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
+      name='task_start_time', full_name='ImageViewer.ProfileResponse.task_start_time', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='profile_y', full_name='ImageViewer.ProfileResponse.profile_y', index=1,
-      number=2, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
+      name='send_start_time', full_name='ImageViewer.ProfileResponse.send_start_time', index=1,
+      number=2, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='profile_z', full_name='ImageViewer.ProfileResponse.profile_z', index=2,
+      name='profile_x', full_name='ImageViewer.ProfileResponse.profile_x', index=2,
       number=3, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='profile_y', full_name='ImageViewer.ProfileResponse.profile_y', index=3,
+      number=4, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='profile_z', full_name='ImageViewer.ProfileResponse.profile_z', index=4,
+      number=5, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -791,8 +612,8 @@ _PROFILERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1921,
-  serialized_end=1995,
+  serialized_start=1105,
+  serialized_end=1229,
 )
 
 
@@ -823,8 +644,8 @@ _CHANNELRESPONSE_ONEROW = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1513,
-  serialized_end=1541,
+  serialized_start=843,
+  serialized_end=871,
 )
 
 _CHANNELRESPONSE = _descriptor.Descriptor(
@@ -836,113 +657,57 @@ _CHANNELRESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='image_data', full_name='ImageViewer.ChannelResponse.image_data', index=0,
-      number=7, type=11, cpp_type=10, label=3,
+      name='task_start_time', full_name='ImageViewer.ChannelResponse.task_start_time', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='send_start_time', full_name='ImageViewer.ChannelResponse.send_start_time', index=1,
+      number=2, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='image_data', full_name='ImageViewer.ChannelResponse.image_data', index=2,
+      number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='channel', full_name='ImageViewer.ChannelResponse.channel', index=1,
-      number=8, type=5, cpp_type=1, label=1,
+      name='channel', full_name='ImageViewer.ChannelResponse.channel', index=3,
+      number=4, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='image_width', full_name='ImageViewer.ChannelResponse.image_width', index=2,
-      number=9, type=5, cpp_type=1, label=1,
+      name='image_width', full_name='ImageViewer.ChannelResponse.image_width', index=4,
+      number=5, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='image_height', full_name='ImageViewer.ChannelResponse.image_height', index=3,
-      number=10, type=5, cpp_type=1, label=1,
+      name='image_height', full_name='ImageViewer.ChannelResponse.image_height', index=5,
+      number=6, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='x_coor_min', full_name='ImageViewer.ChannelResponse.x_coor_min', index=4,
-      number=11, type=2, cpp_type=6, label=1,
+      name='rebin_ratio', full_name='ImageViewer.ChannelResponse.rebin_ratio', index=6,
+      number=7, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='x_coor_delta', full_name='ImageViewer.ChannelResponse.x_coor_delta', index=5,
-      number=12, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y_coor_min', full_name='ImageViewer.ChannelResponse.y_coor_min', index=6,
-      number=13, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y_coor_delta', full_name='ImageViewer.ChannelResponse.y_coor_delta', index=7,
-      number=14, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='x_range_min', full_name='ImageViewer.ChannelResponse.x_range_min', index=8,
-      number=15, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='x_range_max', full_name='ImageViewer.ChannelResponse.x_range_max', index=9,
-      number=16, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y_range_min', full_name='ImageViewer.ChannelResponse.y_range_min', index=10,
-      number=17, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y_range_max', full_name='ImageViewer.ChannelResponse.y_range_max', index=11,
-      number=18, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='xmin', full_name='ImageViewer.ChannelResponse.xmin', index=12,
-      number=19, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='ymin', full_name='ImageViewer.ChannelResponse.ymin', index=13,
-      number=20, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='rebin_ratio', full_name='ImageViewer.ChannelResponse.rebin_ratio', index=14,
-      number=21, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hist_data', full_name='ImageViewer.ChannelResponse.hist_data', index=15,
-      number=22, type=2, cpp_type=6, label=3,
+      name='hist_data', full_name='ImageViewer.ChannelResponse.hist_data', index=7,
+      number=8, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -959,69 +724,26 @@ _CHANNELRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1998,
-  serialized_end=2398,
+  serialized_start=1232,
+  serialized_end=1486,
 )
 
-_REQUEST.fields_by_name['event_type'].enum_type = _EVENTTYPE
-_REQUEST.fields_by_name['init_display_request_message'].message_type = _INITDISPLAYREQUEST
-_REQUEST.fields_by_name['zoom_request_message'].message_type = _ZOOMREQUEST
-_REQUEST.fields_by_name['profile_request_message'].message_type = _PROFILEREQUEST
-_REQUEST.fields_by_name['channel_request_message'].message_type = _CHANNELREQUEST
-_REQUEST.oneofs_by_name['request_message'].fields.append(
-  _REQUEST.fields_by_name['init_display_request_message'])
-_REQUEST.fields_by_name['init_display_request_message'].containing_oneof = _REQUEST.oneofs_by_name['request_message']
-_REQUEST.oneofs_by_name['request_message'].fields.append(
-  _REQUEST.fields_by_name['zoom_request_message'])
-_REQUEST.fields_by_name['zoom_request_message'].containing_oneof = _REQUEST.oneofs_by_name['request_message']
-_REQUEST.oneofs_by_name['request_message'].fields.append(
-  _REQUEST.fields_by_name['profile_request_message'])
-_REQUEST.fields_by_name['profile_request_message'].containing_oneof = _REQUEST.oneofs_by_name['request_message']
-_REQUEST.oneofs_by_name['request_message'].fields.append(
-  _REQUEST.fields_by_name['channel_request_message'])
-_REQUEST.fields_by_name['channel_request_message'].containing_oneof = _REQUEST.oneofs_by_name['request_message']
-_RESPONSE.fields_by_name['event_type'].enum_type = _EVENTTYPE
-_RESPONSE.fields_by_name['init_display_response_message'].message_type = _INITDISPLAYRESPONSE
-_RESPONSE.fields_by_name['zoom_response_message'].message_type = _ZOOMRESPONSE
-_RESPONSE.fields_by_name['profile_response_message'].message_type = _PROFILERESPONSE
-_RESPONSE.fields_by_name['channel_response_message'].message_type = _CHANNELRESPONSE
-_RESPONSE.oneofs_by_name['response_message'].fields.append(
-  _RESPONSE.fields_by_name['init_display_response_message'])
-_RESPONSE.fields_by_name['init_display_response_message'].containing_oneof = _RESPONSE.oneofs_by_name['response_message']
-_RESPONSE.oneofs_by_name['response_message'].fields.append(
-  _RESPONSE.fields_by_name['zoom_response_message'])
-_RESPONSE.fields_by_name['zoom_response_message'].containing_oneof = _RESPONSE.oneofs_by_name['response_message']
-_RESPONSE.oneofs_by_name['response_message'].fields.append(
-  _RESPONSE.fields_by_name['profile_response_message'])
-_RESPONSE.fields_by_name['profile_response_message'].containing_oneof = _RESPONSE.oneofs_by_name['response_message']
-_RESPONSE.oneofs_by_name['response_message'].fields.append(
-  _RESPONSE.fields_by_name['channel_response_message'])
-_RESPONSE.fields_by_name['channel_response_message'].containing_oneof = _RESPONSE.oneofs_by_name['response_message']
 _INITDISPLAYRESPONSE_ONEROW.containing_type = _INITDISPLAYRESPONSE
 _INITDISPLAYRESPONSE.fields_by_name['image_data'].message_type = _INITDISPLAYRESPONSE_ONEROW
 _ZOOMRESPONSE_ONEROW.containing_type = _ZOOMRESPONSE
 _ZOOMRESPONSE.fields_by_name['image_data'].message_type = _ZOOMRESPONSE_ONEROW
 _CHANNELRESPONSE_ONEROW.containing_type = _CHANNELRESPONSE
 _CHANNELRESPONSE.fields_by_name['image_data'].message_type = _CHANNELRESPONSE_ONEROW
-DESCRIPTOR.message_types_by_name['Request'] = _REQUEST
 DESCRIPTOR.message_types_by_name['InitDisplayRequest'] = _INITDISPLAYREQUEST
 DESCRIPTOR.message_types_by_name['ZoomRequest'] = _ZOOMREQUEST
 DESCRIPTOR.message_types_by_name['ProfileRequest'] = _PROFILEREQUEST
 DESCRIPTOR.message_types_by_name['ChannelRequest'] = _CHANNELREQUEST
-DESCRIPTOR.message_types_by_name['Response'] = _RESPONSE
 DESCRIPTOR.message_types_by_name['InitDisplayResponse'] = _INITDISPLAYRESPONSE
 DESCRIPTOR.message_types_by_name['ZoomResponse'] = _ZOOMRESPONSE
 DESCRIPTOR.message_types_by_name['ProfileResponse'] = _PROFILERESPONSE
 DESCRIPTOR.message_types_by_name['ChannelResponse'] = _CHANNELRESPONSE
 DESCRIPTOR.enum_types_by_name['EventType'] = _EVENTTYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
-Request = _reflection.GeneratedProtocolMessageType('Request', (_message.Message,), {
-  'DESCRIPTOR' : _REQUEST,
-  '__module__' : 'imageviewer_pb2'
-  # @@protoc_insertion_point(class_scope:ImageViewer.Request)
-  })
-_sym_db.RegisterMessage(Request)
 
 InitDisplayRequest = _reflection.GeneratedProtocolMessageType('InitDisplayRequest', (_message.Message,), {
   'DESCRIPTOR' : _INITDISPLAYREQUEST,
@@ -1050,13 +772,6 @@ ChannelRequest = _reflection.GeneratedProtocolMessageType('ChannelRequest', (_me
   # @@protoc_insertion_point(class_scope:ImageViewer.ChannelRequest)
   })
 _sym_db.RegisterMessage(ChannelRequest)
-
-Response = _reflection.GeneratedProtocolMessageType('Response', (_message.Message,), {
-  'DESCRIPTOR' : _RESPONSE,
-  '__module__' : 'imageviewer_pb2'
-  # @@protoc_insertion_point(class_scope:ImageViewer.Response)
-  })
-_sym_db.RegisterMessage(Response)
 
 InitDisplayResponse = _reflection.GeneratedProtocolMessageType('InitDisplayResponse', (_message.Message,), {
 
