@@ -8,6 +8,7 @@ enum EventType {
     ZOOM = 2;
     PROFILE = 3;
     CHANNEL = 4;
+    VRANGE = 5;
 
 }
 
@@ -46,6 +47,13 @@ message ChannelRequest {
 
 }
 
+message VrangeRequest {
+
+    int64 send_start_time = 1; // the start time of sending the message
+    float v_range_percent = 2;
+
+}
+
 message InitDisplayResponse {
 
     int64 task_start_time = 1;
@@ -72,9 +80,10 @@ message InitDisplayResponse {
     float orig_y_coor_min = 14;
     float orig_y_coor_delta = 15;
 
-    float rebin_ratio = 16;
+    float x_rebin_ratio = 16;
+    float y_rebin_ratio = 17;
 
-    repeated float hist_data = 17;
+    repeated float hist_data = 18;
 
 }
 
@@ -92,7 +101,8 @@ message ZoomResponse {
     int32 image_width = 5;
     int32 image_height = 6;
 
-    float rebin_ratio = 7;
+    float x_rebin_ratio = 7;
+    float y_rebin_ratio = 8;
 
 }
 
@@ -121,8 +131,19 @@ message ChannelResponse {
     int32 image_width = 5;
     int32 image_height = 6;
 
-    float rebin_ratio = 7;
+    float x_rebin_ratio = 7;
+    float y_rebin_ratio = 8;
 
-    repeated float hist_data = 8;
+    repeated float hist_data = 9;
+
+}
+
+message VrangeResponse {
+
+    int64 task_start_time = 1;
+    int64 send_start_time = 2; // the start time of sending the message
+
+    repeated float vmin = 3;
+    repeated float vmax = 4;
 
 }

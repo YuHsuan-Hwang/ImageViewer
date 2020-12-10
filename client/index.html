@@ -19,6 +19,20 @@
 
                 <div id="div-hist" style="width:580px;height:190px;">
                     <p id="title-hist">Render Configuration</p>
+                    <p id="txt-vrange">Range</p>
+                    <select id="select-vrange" onchange="SelectVrange()">
+                        <option value=100.0>100%</option>
+                        <option value=99.99>99.99%</option>
+                        <option value=99.95>99.95%</option>
+                        <option value=99.9 selected="selected">99.9%</option>
+                        <option value=99.5>99.5%</option>
+                        <option value=99.0>99%</option>
+                        <option value=95.0>95%</option>
+                        <option value=90.0>90%</option>
+                        <option value=-9999>Custom</option>
+                    </select>
+                    <p id="txt-vmax">Max</p><input id="inp-vmax" value="Max" size="8">
+                    <p id="txt-vmin">Min</p><input id="inp-vmin" value="Min" size="8">
                 </div>
             </div>
 
@@ -41,6 +55,8 @@
                     <button id="btn-channel-prev">Prev</button>
                     <button id="btn-channel-next">Next</button>
                     <button id="btn-channel-last">Last</button>
+                    <p id="txt-channel">Channel</p>
+                    <input id="inp-channel" value="0" size="8">
                 </div>
             </div>
 

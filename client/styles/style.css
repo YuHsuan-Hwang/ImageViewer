@@ -62,6 +62,39 @@ p {
     top: -195px;
     left: 10px;
 }
+#txt-vrange {
+    position: relative;
+    top: -194px;
+    left: 450px;
+}
+#select-vrange {
+    position: relative;
+    top: -230px;
+    left: 495px;
+}
+#txt-vmax {
+    position: relative;
+    top: -234px;
+    left: 450px;
+}
+#inp-vmax {
+    position: relative;
+    top: -270px;
+    left: 496px;
+    line-height: 1em;
+}
+#txt-vmin {
+    position: relative;
+    top: -274px;
+    left: 450px;
+}
+#inp-vmin {
+    position: relative;
+    top: -310px;
+    left: 496px;
+    line-height: 1em;
+}
+
 #title-profile-x {
     position: relative;
     top: -195px;
@@ -101,4 +134,15 @@ p {
     position: relative;
     top: -5px;
     left: 10px;
+}
+#txt-channel {
+    position: relative;
+    top: -10px;
+    left: 20px;;
+}
+#inp-channel {
+    position: relative;
+    top: -46px;
+    left: 90px;;
+    line-height: 1em;
 }

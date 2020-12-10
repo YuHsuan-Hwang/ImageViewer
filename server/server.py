@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+import math
 import time
 from datetime import datetime
 import websockets
@@ -21,8 +22,8 @@ class Model:
 
         self.image_data = None
 
-        self.orig_x_coor_min = None
-        self.orig_x_coor_delta = None
+        self.orig_x_coor_min = None   # the coordinate of the (0,0) bin
+        self.orig_x_coor_delta = None # the length of a bin
         self.orig_y_coor_min = None
         self.orig_y_coor_delta = None
 
@@ -39,6 +40,7 @@ class Model:
         self.x_screensize_in_px = None # initialize in InitDisplayResponse
         self.y_screensize_in_px = None
 
+
     def ReadFits( self ):
 
         time1 = time.time()
@@ -48,7 +50,7 @@ class Model:
         path = "/Users/yuhsuan/Documents/web-projects/ImageViewer/client/images/"
         hdu_list = fits.open(path+self.filename)
 
-        dim   = hdu_list[0].header['NAXIS' ]
+        dim   = hdu_list[0].header['NAXIS']
         self.x_len = hdu_list[0].header['NAXIS1']
         self.y_len = hdu_list[0].header['NAXIS2']
         self.z_len = hdu_list[0].header['NAXIS3']
@@ -59,7 +61,7 @@ class Model:
         x_centervalue = hdu_list[0].header['CRVAL1']
         y_centervalue = hdu_list[0].header['CRVAL2']
         z_centervalue = hdu_list[0].header['CRVAL3']
-        self.orig_x_coor_delta = hdu_list[0].header['CDELT1']
+        self.orig_x_coor_delta = hdu_list[0].header['CDELT1']  # the length of a bin
         self.orig_y_coor_delta = hdu_list[0].header['CDELT2']
         z_coordelta = hdu_list[0].header['CDELT3']
 
@@ -69,45 +71,19 @@ class Model:
         hdu_list.close()
 
         # calculate coordinate
-        self.orig_x_coor_min = x_centervalue - x_centerpix*self.orig_x_coor_delta
+        self.orig_x_coor_min = x_centervalue - x_centerpix*self.orig_x_coor_delta # the coordinate of the (0,0) bin
         self.orig_y_coor_min = y_centervalue - y_centerpix*self.orig_y_coor_delta
         print("(", datetime.now(), ") orig coor min: ", self.orig_x_coor_min, self.orig_y_coor_min )
 
         # colorbar settings
-        self.vmax = np.nanmax( np.nanmax( self.image_data, axis=1 ), axis=1 )
-        self.vmin = np.nanmin( np.nanmin( self.image_data, axis=1 ), axis=1 )
+        self.vmax = np.nanpercentile( np.nanpercentile( self.image_data, 99.9, axis=1 ), 99.9, axis=1 )
+        self.vmin = np.nanpercentile( np.nanpercentile( self.image_data, 0.1, axis=1 ), 0.1, axis=1 )
 
         self.x_len_scaled = self.x_len
         self.y_len_scaled = self.y_len
 
         time2 = time.time()
         print( "(", datetime.now(), ") read fits file done, time =", (time2-time1)*1000.0 , "millisec")
-
-    def OnMessage_old( self, message_bytes ):
-
-        # receive and decode the message
-        message = pb.Request()
-        message.ParseFromString(message_bytes)
-
-        # print send time
-        time2 = time.time()
-        print("(", datetime.now(), ") received message, send time: ",
-        round(time2*1000.0)-message.send_start_time, "millisec" )
-
-        # trigger certain response
-        if ( message.event_type==pb.EventType.INIT_DISPLAY ):
-            return_message_bytes = self.InitDisplayResponse( message )
-
-        elif ( message.event_type==pb.EventType.ZOOM ):
-            return_message_bytes = self.ZoomResponse( message )
-
-        elif ( message.event_type==pb.EventType.PROFILE ):
-            return_message_bytes = self.ProfileResponse( message )
-        
-        elif ( message.event_type==pb.EventType.CHANNEL ):
-            return_message_bytes = self.ChannelResponse( message )
-        
-        return return_message_bytes
 
     def OnMessage( self, message_bytes ):
 
@@ -121,19 +97,27 @@ class Model:
         # trigger certain response
         if ( event_type==pb.EventType.INIT_DISPLAY ):
             return_message_bytes = self.InitDisplayResponse( request_message )
+            return return_message_bytes
         
         elif ( event_type==pb.EventType.ZOOM ):
             return_message_bytes = self.ZoomResponse( request_message )
+            return return_message_bytes
 
         elif ( event_type==pb.EventType.PROFILE ):
             return_message_bytes = self.ProfileResponse( request_message )
+            return return_message_bytes
         
         elif ( event_type==pb.EventType.CHANNEL ):
             return_message_bytes = self.ChannelResponse( request_message )
-        
-        return return_message_bytes
-        
+            return return_message_bytes
 
+        elif ( event_type==pb.EventType.VRANGE ):
+            return_message_bytes = self.VrangeResponse( request_message )
+            return return_message_bytes
+
+        else:
+            print("(", datetime.now(), ")!!!unknown message!!!")
+        
 
     def InitDisplayResponse( self, message_bytes ):
 
@@ -151,7 +135,10 @@ class Model:
         print("(", datetime.now(), ") start task: init display" )
 
         self.x_screensize_in_px, self.y_screensize_in_px = message.x_screensize_in_px, message.y_screensize_in_px # 500*2, 500*2
+        
+        # for testing
         self.x_screensize_in_px, self.y_screensize_in_px = int(self.x_screensize_in_px/10), int(self.y_screensize_in_px/10) # test with lower resolution: 100, 100
+        #self.x_screensize_in_px, self.y_screensize_in_px = int(self.x_screensize_in_px/100), int(self.y_screensize_in_px/100) # test with lower resolution: 10, 10
 
         time2 = time.time()
         print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
@@ -197,9 +184,10 @@ class Model:
         response_message.orig_y_coor_min   = self.orig_y_coor_min
         response_message.orig_y_coor_delta = self.orig_y_coor_delta
 
-        response_message.rebin_ratio = rebin_ratio
+        response_message.x_rebin_ratio = rebin_ratio
+        response_message.y_rebin_ratio = rebin_ratio
 
-        response_message.hist_data.extend( self.image_data.flatten() )
+        response_message.hist_data.extend( self.image_data[self.channel].flatten() )
 
         response_message.task_start_time = message.send_start_time
         response_message.send_start_time = round(time1*1000.0)
@@ -208,6 +196,12 @@ class Model:
         response_message_bytes = response_message.SerializeToString()
         return_message_bytes = bytes([pb.EventType.INIT_DISPLAY]) + response_message_bytes
         print("(", datetime.now(), ") end task: init display")
+
+        # set condition for channel request (expand the image to 4 times large (len*2))
+        self.xmin = np.ceil( -0.5*self.x_len )
+        self.ymin = np.ceil( -0.5*self.y_len )
+        self.x_len_scaled = 2.0*self.x_len
+        self.y_len_scaled = 2.0*self.y_len
 
         return return_message_bytes
 
@@ -244,7 +238,7 @@ class Model:
 
         # output array
         time1 = time.time()
-        image_data_return, rebin_ratio = self.ImageArray( xmin, ymin, x_len_scaled, y_len_scaled, channel )
+        image_data_return, x_rebin_ratio, y_rebin_ratio = self.ImageArray( xmin, ymin, x_len_scaled, y_len_scaled, channel )
         time2 = time.time()
         print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
                 self.x_len*self.y_len/(time2-time1)/1000.0, "px/millisec" )
@@ -252,7 +246,7 @@ class Model:
         # set the returning message
         response_message = pb.ZoomResponse()
 
-        for j in range( image_data_return.shape[1] ):
+        for j in range( image_data_return.shape[0] ):
             row_data = response_message.image_data.add()
             row_data.point_data.extend( image_data_return[j] )
 		
@@ -260,7 +254,8 @@ class Model:
         response_message.image_width  = image_data_return.shape[0]
         response_message.image_height = image_data_return.shape[1]
 
-        response_message.rebin_ratio = rebin_ratio
+        response_message.x_rebin_ratio = x_rebin_ratio
+        response_message.y_rebin_ratio = y_rebin_ratio
 
         response_message.task_start_time = message.send_start_time
         response_message.send_start_time = round(time1*1000.0)
@@ -281,7 +276,7 @@ class Model:
          # print send time
         time2 = time.time()
         print("(", datetime.now(), ") received message, send time: ",
-        round(time2*1000.0)-message.send_start_time, "millisec" )
+              round(time2*1000.0)-message.send_start_time, "millisec" )
 
         # read message
         time1 = time.time()
@@ -295,8 +290,8 @@ class Model:
         print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
 
         # output profiles
-        profile_x = self.image_data[channel,position_y,:]
-        profile_y = self.image_data[channel,:,position_x]
+        profile_x = self.image_data[self.channel,position_y,:]
+        profile_y = self.image_data[self.channel,:,position_x]
         profile_z = self.image_data[:,position_x,position_y]
 
         # set the returning message
@@ -337,7 +332,7 @@ class Model:
 
         # output array
         time1 = time.time()
-        image_data_return, rebin_ratio = self.ImageArray( self.xmin, self.ymin, self.x_len_scaled, self.y_len_scaled, self.channel )
+        image_data_return, x_rebin_ratio, y_rebin_ratio = self.ImageArray( self.xmin, self.ymin, self.x_len_scaled, self.y_len_scaled, self.channel )
         time2 = time.time()
         print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
                 self.x_len*self.y_len/(time2-time1)/1000.0, "px/millisec" )
@@ -345,7 +340,7 @@ class Model:
         # set the returning message
         response_message = pb.ChannelResponse()
 
-        for j in range( image_data_return.shape[1] ):
+        for j in range( image_data_return.shape[0] ):
             row_data = response_message.image_data.add()
             row_data.point_data.extend( image_data_return[j] )
 		
@@ -353,9 +348,10 @@ class Model:
         response_message.image_width  = image_data_return.shape[0]
         response_message.image_height = image_data_return.shape[1]
 
-        response_message.rebin_ratio = rebin_ratio
+        response_message.x_rebin_ratio = x_rebin_ratio
+        response_message.y_rebin_ratio = y_rebin_ratio
 
-        response_message.hist_data.extend( self.image_data.flatten() )
+        response_message.hist_data.extend( self.image_data[self.channel].flatten() )
         
         response_message.task_start_time = message.send_start_time
         response_message.send_start_time = round(time1*1000.0)
@@ -366,39 +362,85 @@ class Model:
         print("(", datetime.now(), ") end task: change channel")
 
         return return_message_bytes
-    
+
+    def VrangeResponse( self, message_bytes ):
+
+        # receive and decode the message
+        message = pb.VrangeRequest()
+        message.ParseFromString(message_bytes)
+
+         # print send time
+        time2 = time.time()
+        print("(", datetime.now(), ") received message, send time: ",
+        round(time2*1000.0)-message.send_start_time, "millisec" )
+
+        # read message
+        time1 = time.time()
+        print("(", datetime.now(), ") start task: change vrange" )
+
+        v_range_percent = message.v_range_percent
+
+        time2 = time.time()
+        print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
+
+        # reset colorbar settings
+        self.vmax = np.nanpercentile( np.nanpercentile( self.image_data, v_range_percent, axis=1 ), v_range_percent, axis=1 )
+        self.vmin = np.nanpercentile( np.nanpercentile( self.image_data, 100-v_range_percent, axis=1 ), 100-v_range_percent, axis=1 )
+
+        # set the returning message
+        response_message = pb.VrangeResponse()
+
+        response_message.vmax.extend( self.vmax )
+        response_message.vmin.extend( self.vmin )
+        
+        response_message.task_start_time = message.send_start_time
+        response_message.send_start_time = round(time1*1000.0)
+        
+        # encode and send back message
+        response_message_bytes = response_message.SerializeToString()
+        return_message_bytes = bytes([pb.EventType.VRANGE]) + response_message_bytes
+        print("(", datetime.now(), ") end task: change vrange")
+
+        return return_message_bytes
+
     def ImageArray( self, xmin, ymin, x_len_scaled, y_len_scaled, channel ):
 
         image_data_onechannel = self.image_data[channel]
+
+        # expand the image to 4 times large (len*2)
+        x_screensize_in_px_scaled = self.x_screensize_in_px*2.0
+        y_screensize_in_px_scaled = self.y_screensize_in_px*2.0
         
-        if y_len_scaled>self.y_len: # smaller than orig image, need to manage the margin of the plotting
-            y_screensize_in_px_scaled = int( self.y_screensize_in_px * (self.y_len/y_len_scaled) )
-            if y_screensize_in_px_scaled % 2 == 1 : y_screensize_in_px_scaled += 1
+        # slice the image
+        if (xmin<0): xmin_slice = 0
+        else: xmin_slice = xmin
+        if (ymin<0): ymin_slice = 0
+        else: ymin_slice = ymin
 
-            if self.y_len>(y_screensize_in_px_scaled): # image resolution is too high, rebin
-                image_data_return = cv2.resize( image_data_onechannel,
-                                                (y_screensize_in_px_scaled, y_screensize_in_px_scaled),
-                                                interpolation=cv2.INTER_AREA )
-                rebin_ratio = (y_screensize_in_px_scaled)/self.y_len
+        if (xmin+x_len_scaled>self.y_len): xmax_slice = self.y_len
+        else: xmax_slice = xmin+x_len_scaled
+        if (ymin+y_len_scaled>self.y_len): ymax_slice = self.y_len
+        else: ymax_slice = ymin+y_len_scaled
 
-            else:
-                image_data_return = image_data_onechannel
-                rebin_ratio = 1
+        image_data_return = image_data_onechannel[ ymin_slice:ymax_slice:1, xmin_slice:xmax_slice:1 ]
 
-        else: # larger than orig image, need to slice the image
+        # calculate required resolution, especially for smaller image
+        x_screensize_in_px_scaled = math.ceil(x_screensize_in_px_scaled * (xmax_slice-xmin_slice)/x_len_scaled)
+        y_screensize_in_px_scaled = math.ceil(y_screensize_in_px_scaled * (ymax_slice-ymin_slice)/y_len_scaled)
+        print( x_screensize_in_px_scaled, y_screensize_in_px_scaled )
 
-            image_data_return = image_data_onechannel[ ymin:ymin+y_len_scaled:1, ymin:ymin+y_len_scaled:1 ]
-            
-            if y_len_scaled>self.y_screensize_in_px: # image resolution is too high, rebin
-                image_data_return = cv2.resize( image_data_return,
-                                                (self.y_screensize_in_px, self.x_screensize_in_px),
-                                                interpolation=cv2.INTER_AREA )					
-                rebin_ratio = self.y_screensize_in_px/y_len_scaled
+        # rebin
+        if ( (xmax_slice-xmin_slice)>x_screensize_in_px_scaled )|( (ymax_slice-ymin_slice)>y_screensize_in_px_scaled ):
+            image_data_return = cv2.resize( image_data_return,
+                                            (x_screensize_in_px_scaled, y_screensize_in_px_scaled),
+                                            interpolation=cv2.INTER_AREA )
+            x_rebin_ratio = (x_screensize_in_px_scaled)/(xmax_slice-xmin_slice)                                
+            y_rebin_ratio = (y_screensize_in_px_scaled)/(ymax_slice-ymin_slice)
+        else:
+            x_rebin_ratio = 1
+            y_rebin_ratio = 1
 
-            else:
-                rebin_ratio = 1
-        
-        return image_data_return, rebin_ratio
+        return image_data_return, x_rebin_ratio, y_rebin_ratio
 
 
 class Server:
@@ -449,10 +491,11 @@ async def OneClientTask( ws, path ):
         print("(", datetime.now(), ") work begin")
 
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5.cube.I.pbcor.fits" )
-        model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits" )
-        #model = Model( "HD163296_CO_2_1.fits" )
+        #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits" )
+        model = Model( "HD163296_CO_2_1.fits" )
         #model = Model( "vla_3ghz_msmf.fits" )
         #model = Model( "mips_24_GO3_sci_10.fits" )
+        #model = Model( "cluster_08192.fits" )
 
         model.ReadFits()
 
