@@ -26,7 +26,7 @@ class Session{
 }
 
 /**
- * properties for displayed image
+ * properties for displaying image
  * and methods related to actions on web elements
  */
 class View{
@@ -53,7 +53,8 @@ class View{
         // image data for display (updated in controller.XxxxResponse)
         this.vmin, this.vmax; // colorscale min and max
         this.image_data = [[0]]; // main display image, 3d data, change with controller.scale
-        this.hist_data; // histogram of the current channel, change with view.channel
+        //this.hist_data; // histogram of the current channel, change with view.channel
+        this.hist_data_y, this.hist_data_x;
         this.profile_x, this.profile_y, this.profile_z; // profile of the current cursor position and channel, change with view.corsor_value and view.channel
 
         // status of the display image
@@ -79,16 +80,15 @@ class View{
         Plotly.react( this.div_image, [{z:[[0]],type:'heatmapgl',showscale:false, zsmooth:false, colorscale:'Viridis',hoverinfo:"none"}],
                       heatmap_layout, {displayModeBar:false,displaylogo:false,scrollZoom:true} ); // Plotly.react runs slightly faster than Plotly.newPlot
 
-        // setup the histogram panel
-        let hist_layout = {
+       let hist_layout = {
             autosize:false, width:580, height:190, margin:{ l:70, r:150, b:40, t:40 },
-            xaxis:{ title:"Value",  color:'royalblue', linecolor:'royalblue', mirror:true },
-            yaxis:{ title:"Number", color:'royalblue', linecolor:'royalblue', mirror:true },
-            paper_bgcolor:'Aliceblue',
+            xaxis:{ title:"Value",       color:'royalblue', linecolor:'royalblue', mirror:true },
+            yaxis:{ title:"log(Number)", color:'royalblue', linecolor:'royalblue', mirror:true, type:'log' },
+            paper_bgcolor:'Aliceblue', bargap:0,
             shapes:[{type:'line',x0:0.01, x1:0.01,y0:0, y1:1,yref:'paper',line:{color:'lightpink', width:1}},
-                    {type:'line',x0:-0.01,x1:-0.01,y0:0,y1:1,yref:'paper',line:{color:'lightgreen',width:1}}]
+            {type:'line',x0:-0.01,x1:-0.01,y0:0,y1:1,yref:'paper',line:{color:'lightgreen',width:1}}]
         }
-        Plotly.react( this.div_hist, [{x:[],type:'histogram',opacity: 0.4}], hist_layout, {displaylogo:false});
+        Plotly.react( this.div_hist, [{y:[],type:'bar',opacity: 0.4}], hist_layout, {displaylogo:false});
 
         // setup x, y, z profile panels
         let bar_layout_x = {
@@ -142,7 +142,7 @@ class View{
 
     // update histogram data
     UpdateHist(){       
-        Plotly.update( this.div_hist, {x:[this.hist_data]},
+        Plotly.update( this.div_hist, {y:[this.hist_data_y],x:[this.hist_data_x]},//{x:[this.hist_data]},
             { shapes:[{type:'line',x0:this.vmax[this.channel],x1:this.vmax[this.channel],y0:0,y1:1,yref:'paper',line:{color:'lightpink',width:2}},
                       {type:'line',x0:this.vmin[this.channel],x1:this.vmin[this.channel],y0:0,y1:1,yref:'paper',line:{color:'lightgreen',width:2}}] });
         this.inp_vmax.value = this.vmax[this.channel];
@@ -188,16 +188,19 @@ class Controller{
 
         // scroll event parameter
         this.relayout_call = true;
+        this.zoom_timer;
+        this.zoom_interval = 50;
 
         // mouse event parameter
         this.hover_function_call = false; // set to true after init display is complete
 
         // required info when displaying new image
         this.scale = 1; // zoom status
-        this.xmin = 0, this.ymin = 0; // related to the orig px size
-        this.request_width, this.request_height; // related to the orig px size
+        this.xmin = 0, this.ymin = 0; // in orig px size
+        this.request_width, this.request_height; // in orig px size
         this.width, this.height; // rebinned size
         this.x_rebin_ratio = 1, this.y_rebin_ratio = 1; // rebin status
+        this.v_range_percent = 99.9; // range percentage of the color scale
     }
 
     // initial setup after open the browser
@@ -214,21 +217,17 @@ class Controller{
         request_message.setSendStartTime( Date.now() )
 
         // encode and send
-        let event_type = [1]; // INIT_DISPLAY
-        let request_message_bytes = request_message.serializeBinary();
-
-        let message_bytes = new Uint8Array( request_message_bytes.length+1 );
-        message_bytes.set( event_type, 0 );
-        message_bytes.set( request_message_bytes, 1 );
-        console.log(new Date(),"send message: ", message_bytes);
-        ws.send(message_bytes);
+        this.SendRequest( [1], request_message.serializeBinary(), ws ) // 1: INIT_DISPLAY
     }
 
     RelayoutEvent( event, ws ) {
         if( this.relayout_call ) { // trigger zooming after the new zoomed image is plotted
 
-            this.relayout_call = false;
-           
+            this.zoom_request_num+=1;
+
+            //this.relayout_call = false;
+            //this.hover_function_call = false;
+
             // read the new axis range
             this.view.x_range_min = event["xaxis.range"][0];
             this.view.x_range_max = event["xaxis.range"][1];
@@ -236,22 +235,42 @@ class Controller{
             this.view.y_range_max = event["yaxis.range"][1];
             
             // calculate the new required data range
-            this.xmin = Math.ceil( 0.5+(event["xaxis.range"][0]-this.view.orig_x_coor_min)/this.view.orig_x_coor_delta );
-            this.ymin = Math.ceil( 0.5+(event["yaxis.range"][0]-this.view.orig_y_coor_min)/this.view.orig_y_coor_delta );
-            this.request_width  = parseInt( (event["xaxis.range"][1]-event["xaxis.range"][0])/this.view.orig_x_coor_delta );
-            this.request_height = parseInt( (event["yaxis.range"][1]-event["yaxis.range"][0])/this.view.orig_y_coor_delta );
-            console.log( this.xmin, this.ymin, this.request_width, this.request_height );
+            this.xmin = parseInt( 0.5+(event["xaxis.range"][0]-this.view.orig_x_coor_min)/this.view.orig_x_coor_delta );
+            this.ymin = parseInt( 0.5+(event["yaxis.range"][0]-this.view.orig_y_coor_min)/this.view.orig_y_coor_delta );
+            this.request_width  = 1+Math.ceil( (event["xaxis.range"][1]-event["xaxis.range"][0])/this.view.orig_x_coor_delta );
+            this.request_height = 1+Math.ceil( (event["yaxis.range"][1]-event["yaxis.range"][0])/this.view.orig_y_coor_delta );
+            //console.log( this.xmin, this.ymin, this.request_width, this.request_height );
 
-            // expand the image to 4 times large (len*2)
-            this.xmin = Math.ceil( this.xmin-0.5*this.request_width  )
-            this.ymin = Math.ceil( this.ymin-0.5*this.request_height )
-            this.request_width *= 2.0
-            this.request_height *= 2.0
+            /* // for heatmap
+            // read the new axis range
+            this.view.x_range_min = event['xaxis.range[0]'];
+            this.view.x_range_max = event['xaxis.range[1]'];
+            this.view.y_range_min = event['yaxis.range[0]'];
+            this.view.y_range_max = event['yaxis.range[1]'];
+            
+            // calculate the new required data range
+            this.xmin = Math.ceil( 0.5+(event['xaxis.range[0]']-this.view.orig_x_coor_min)/this.view.orig_x_coor_delta );
+            this.ymin = Math.ceil( 0.5+(event['yaxis.range[0]']-this.view.orig_y_coor_min)/this.view.orig_y_coor_delta );
+            this.request_width  = parseInt( (event['xaxis.range[1]']-event['xaxis.range[0]'])/this.view.orig_x_coor_delta );
+            this.request_height = parseInt( (event['yaxis.range[1]']-event['yaxis.range[0]'])/this.view.orig_y_coor_delta );
+            //console.log( this.xmin, this.ymin, this.request_width, this.request_height );
+            */
 
             if( (this.request_width<=0)||(this.request_height<=0) ) { // stop zooming if the length is zero
                 this.view.Redisplay();
             } else {
-                this.ZoomRequest( ws );
+                //this.ZoomRequest( ws );
+
+                // manage the time interval
+                window.clearTimeout(this.zoom_timer); // default the timer
+                console.log("set up zoom_timer");
+                this.zoom_timer =  window.setTimeout( () => { // arrow function, or "this" will become "window object" if use traditional function syntax
+                console.log("send zoom request");
+                    this.ZoomRequest( ws );
+                    this.relayout_call = false;
+                    this.hover_function_call = false;
+                }, this.zoom_interval ); // reopen the access to send zoom request after a time interval
+
             }
         
         }else {
@@ -272,14 +291,7 @@ class Controller{
         request_message.setSendStartTime( Date.now() );
 
         // encode and send
-        let event_type = [2]; // ZOOM
-        let request_message_bytes = request_message.serializeBinary();
-
-        let message_bytes = new Uint8Array( request_message_bytes.length+1 );
-        message_bytes.set( event_type, 0 );
-        message_bytes.set( request_message_bytes, 1 );
-        console.log(new Date(),"send message: ", message_bytes);
-        ws.send(message_bytes);
+        this.SendRequest( [2], request_message.serializeBinary(), ws ) // 2: ZOOM
     }
 
     // response to cursor hover events
@@ -310,16 +322,7 @@ class Controller{
         request_message.setSendStartTime( Date.now() );
         
         // encode and send
-        let event_type = [3]; // PROFILE
-        let request_message_bytes = request_message.serializeBinary();
-
-        let message_bytes = new Uint8Array( request_message_bytes.length+1 );
-        message_bytes.set( event_type, 0 );
-        message_bytes.set( request_message_bytes, 1 );
-        if( ws.readyState != 0){
-            console.log(new Date(),"send message: ", message_bytes);
-            ws.send(message_bytes);
-        }
+        this.SendRequest( [3], request_message.serializeBinary(), ws ) // 3: PROFILE
     }
 
     // response to channel buttons in the animation panel
@@ -328,27 +331,38 @@ class Controller{
             case 0:
                 if ( this.view.channel!=0 ){
                     this.view.channel = 0;
+                    inpChannel.value=this.view.channel;
                     this.ChannelRequest(ws);
                 }
                 break;
             case 9999:
                 if ( this.view.channel!=this.view.channel_num-1 ){
                     this.view.channel = this.view.channel_num-1;
+                    inpChannel.value=this.view.channel;
                     this.ChannelRequest(ws);
                 }
                 break;
             case 1:
                 if ( this.view.channel!=this.view.channel_num-1 ){
                     this.view.channel += 1;
+                    inpChannel.value=this.view.channel;
                     this.ChannelRequest(ws);
                 }
                 break;
             case -1:
                 if ( this.view.channel!=0 ){
                     this.view.channel -= 1;
+                    inpChannel.value=this.view.channel;
                     this.ChannelRequest(ws);
                 }
                 break;
+        }
+    }
+
+    InputChannel( input_channel, ws ) {
+        if ( (this.view.channel!=input_channel)&&(input_channel!=undefined) ) {
+            this.view.channel = input_channel;
+            this.ChannelRequest(ws);
         }
     }
 
@@ -358,56 +372,85 @@ class Controller{
         let request_message = new proto.ImageViewer.ChannelRequest();
         request_message.setChannel( this.view.channel );
         request_message.setSendStartTime( Date.now() );
-        console.log("channel", this.view.channel);
 
         // encode and send
-        let event_type = [4]; // CHANNEL
-        let request_message_bytes = request_message.serializeBinary();
+        this.SendRequest( [4], request_message.serializeBinary(), ws ) // 4: CHANNEL
+    }
 
+    SelectVrange( input_v_range_percent ) {
+        if( input_v_range_percent!=-9999) {
+
+            this.v_range_percent = input_v_range_percent
+
+            // reset vmin, vmax
+            this.view.vmin = new Array(this.view.channel_num).fill(-9999);
+            this.view.vmax = new Array(this.view.channel_num).fill(-9999);
+
+            // calculate vmin, vmax
+            let v_min_index = this.view.orig_width * this.view.orig_height * (100.0-this.v_range_percent)/100.0;
+            let v_max_index = v_min_index;
+            for (let i=0; i<this.view.hist_data_y.length; i++) {
+                v_min_index -= this.view.hist_data_y[i];
+                if (v_min_index<0.0){
+                    this.view.vmin[this.view.channel] = this.view.hist_data_x[i];
+                    break;
+                }
+            }
+            for (let i=this.view.hist_data_y.length-1; i>=0; i--) {
+                v_max_index -= this.view.hist_data_y[i];
+                if (v_max_index<0.0){
+                    this.view.vmax[this.view.channel] = this.view.hist_data_x[i];
+                    break;
+                }
+            }
+
+            // display image
+            this.view.UpdateDisplayVrange();
+            this.view.UpdateHistVrange();
+        }
+    }
+
+    InputVmax( input_vmax ) {
+        this.view.vmax = new Array(this.view.channel_num).fill(input_vmax);
+        this.view.UpdateDisplayVrange();
+        this.view.UpdateHistVrange();
+        selectVrange.value=-9999;
+    }
+    InputVmin( input_vmin ) {
+        this.view.vmin = new Array(this.view.channel_num).fill(input_vmin);
+        this.view.UpdateDisplayVrange();
+        this.view.UpdateHistVrange();
+        selectVrange.value=-9999;
+    }
+
+    HistRequest( hist_mode,ws ) {
+
+        // reset vmin, vmax if not in Custom mode
+        if (selectVrange.value!=-9999) {
+            this.view.vmin = new Array(this.view.channel_num).fill(-9999);
+            this.view.vmax = new Array(this.view.channel_num).fill(-9999);
+        }
+
+        // set the message
+        let request_message = new proto.ImageViewer.HistRequest();
+        request_message.setHistMode( hist_mode );
+        request_message.setSendStartTime( Date.now() );
+
+        // encode and send
+        this.SendRequest( [5], request_message.serializeBinary(), ws ) // 5: HIST
+    }
+
+    SendRequest( event_type, request_message_bytes, ws ) {
         let message_bytes = new Uint8Array( request_message_bytes.length+1 );
         message_bytes.set( event_type, 0 );
         message_bytes.set( request_message_bytes, 1 );
         console.log(new Date(),"send message: ", message_bytes);
-        ws.send(message_bytes);
-    }
-
-    InputChannel( event, ws ) {
-        if ( (this.view.channel!=parseInt(event.target.value))&&(parseInt(event.target.value)!=undefined) ) {
-            this.view.channel = parseInt(event.target.value);
-            this.ChannelRequest(ws);
-        }
-    }
-
-    VrangeRequest( v_range_percent,ws ) {
-        if( v_range_percent!=-9999) {
-            // set the message
-            let request_message = new proto.ImageViewer.VrangeRequest();
-            request_message.setVRangePercent( v_range_percent );
-            request_message.setSendStartTime( Date.now() );
-
-            // encode and send
-            let event_type = [5]; // VRANGE
-            let request_message_bytes = request_message.serializeBinary();
-
-            let message_bytes = new Uint8Array( request_message_bytes.length+1 );
-            message_bytes.set( event_type, 0 );
-            message_bytes.set( request_message_bytes, 1 );
-            console.log(new Date(),"send message: ", message_bytes);
+        if( ws.readyState != 0){
             ws.send(message_bytes);
         }
-    }
-
-    InputVmax( event ) {
-        this.view.vmax = new Array(this.view.channel_num).fill(parseFloat(event.target.value));
-        this.view.UpdateDisplayVrange();
-        this.view.UpdateHistVrange();
-        selectVrange.value=-9999;
-    }
-    InputVmin( event ) {
-        this.view.vmin = new Array(this.view.channel_num).fill(parseFloat(event.target.value));
-        this.view.UpdateDisplayVrange();
-        this.view.UpdateHistVrange();
-        selectVrange.value=-9999;
+        else {
+            console.log("send request reject");
+        }
     }
 
     // receive message from the backend
@@ -435,8 +478,8 @@ class Controller{
             case 4: // CHANNEL
                 this.ChannelResponse( return_message_bytes );
                 break;
-            case 5: // VRANGE
-                this.VrangeResponse( return_message_bytes );
+            case 5: // HIST
+                this.HistResponse( return_message_bytes );
         }
         
     }
@@ -465,9 +508,6 @@ class Controller{
         this.view.orig_y_coor_min   = return_message.getOrigYCoorMin();
         this.view.orig_y_coor_delta = return_message.getOrigYCoorDelta();
 
-        // update image data for display
-        this.view.vmin = return_message.getVminList();
-        this.view.vmax = return_message.getVmaxList();
         this.width = return_message.getImageWidth();
         this.height = return_message.getImageHeight();
         let data = new Array(this.height);
@@ -475,7 +515,9 @@ class Controller{
             data[i] = return_message.getImageDataList()[i].getPointDataList();
         }
         this.view.image_data[0] = data;
-        this.view.hist_data    = return_message.getHistDataList();
+
+        this.view.hist_data_y = return_message.getNumbersList();
+        this.view.hist_data_x = return_message.getBinsList();
 
         // update image info
         this.x_rebin_ratio  = return_message.getXRebinRatio();
@@ -492,6 +534,28 @@ class Controller{
         this.view.x_coor_delta = this.view.orig_x_coor_delta/this.x_rebin_ratio;
         this.view.y_coor_min = this.view.y_range_min + 0.5*this.view.orig_y_coor_delta/this.y_rebin_ratio;
         this.view.y_coor_delta = this.view.orig_y_coor_delta/this.y_rebin_ratio;
+
+        // update image data for display
+        this.view.vmin = Array(this.view.channel_num).fill(-9999)
+        this.view.vmax = Array(this.view.channel_num).fill(-9999)
+
+        // calculate vmin, vmax
+        let v_min_index = this.view.orig_width * this.view.orig_height * (100.0-this.v_range_percent)/100.0;
+        let v_max_index = v_min_index;
+        for (let i=0; i<this.view.hist_data_y.length; i++) {
+            v_min_index -= this.view.hist_data_y[i];
+            if (v_min_index<0.0){
+                this.view.vmin[0] = this.view.hist_data_x[i];
+                break;
+            }
+        }
+        for (let i=this.view.hist_data_y.length-1; i>=0; i--) {
+            v_max_index -= this.view.hist_data_y[i];
+            if (v_max_index<0.0){
+                this.view.vmax[0] = this.view.hist_data_x[i];
+                break;
+            }
+        }
         
         // display image
         this.view.UpdateFilename();
@@ -604,25 +668,50 @@ class Controller{
             data[i] = return_message.getImageDataList()[i].getPointDataList();
         }
         this.view.image_data[return_message.getChannel()] = data;
-        this.view.hist_data    = return_message.getHistDataList();
+
+        //this.view.hist_data    = return_message.getHistDataList();
+        this.view.hist_data_y = return_message.getNumbersList();
+        this.view.hist_data_x = return_message.getBinsList();
 
         // update image info
         this.view.x_rebin_ratio  = return_message.getXRebinRatio();
         this.view.y_rebin_ratio  = return_message.getYRebinRatio();
 
         console.log(new Date(),"read message: ", Date.now()-time1, "millisec" )
-        
+
+        if ( (this.view.vmin[this.view.channel]===-9999)&&(this.v_range_percent!=-9999) ) {
+            // calculate vmin, vmax
+            let v_min_index = this.view.orig_width * this.view.orig_height * (100.0-this.v_range_percent)/100.0;
+            let v_max_index = v_min_index;
+            for (let i=0; i<this.view.hist_data_y.length; i++) {
+                v_min_index -= this.view.hist_data_y[i];
+                if (v_min_index<0.0){
+                    this.view.vmin[this.view.channel] = this.view.hist_data_x[i];
+                    break;
+                }
+            }
+            for (let i=this.view.hist_data_y.length-1; i>=0; i--) {
+                v_max_index -= this.view.hist_data_y[i];
+                if (v_max_index<0.0){
+                    this.view.vmax[this.view.channel] = this.view.hist_data_x[i];
+                    break;
+                }
+            }
+        }
+
         // display image
         this.view.UpdateDisplay();
-        this.view.UpdateHist();
-        this.view.UpdateProfile()
+        if ( selectHist.value==='2'){
+            this.view.UpdateHist();
+        }
+        this.view.UpdateProfile();
     }
 
-    VrangeResponse( return_message_bytes ){
+    HistResponse( return_message_bytes ){
         // decode and read the message
         let time1 = Date.now();
 
-        let return_message = proto.ImageViewer.VrangeResponse.deserializeBinary(return_message_bytes);
+        let return_message = proto.ImageViewer.HistResponse.deserializeBinary(return_message_bytes);
 
         // print send time and total response time
         let send_time = Date.now() - return_message.getSendStartTime();
@@ -632,12 +721,32 @@ class Controller{
                     total_response_time, "millisec" );
 
         // update image data for display
-        this.view.vmin = return_message.getVminList();
-        this.view.vmax = return_message.getVmaxList();
+        this.view.hist_data_y = return_message.getNumbersList();
+        this.view.hist_data_x = return_message.getBinsList();
+
+        if (this.v_range_percent!=-9999) {
+            // calculate vmin, vmax
+            let v_min_index = this.view.orig_width * this.view.orig_height * (100.0-this.v_range_percent)/100.0;
+            let v_max_index = v_min_index;
+            for (let i=0; i<this.view.hist_data_y.length; i++) {
+                v_min_index -= this.view.hist_data_y[i];
+                if (v_min_index<0.0){
+                    this.view.vmin = new Array(this.view.channel_num).fill(this.view.hist_data_x[i]);
+                    break;
+                }
+            }
+            for (let i=this.view.hist_data_y.length-1; i>=0; i--) {
+                v_max_index -= this.view.hist_data_y[i];
+                if (v_max_index<0.0){
+                    this.view.vmax = new Array(this.view.channel_num).fill(this.view.hist_data_x[i]);
+                    break;
+                }
+            }
+        }
 
         // display image
         this.view.UpdateDisplayVrange();
-        this.view.UpdateHistVrange();
+        this.view.UpdateHist();
     }
 
 }
@@ -650,6 +759,7 @@ let txtCursor    = document.getElementById( "txt-cursor"    );
 
 // hist panel
 let divHist      = document.getElementById( "div-hist"      );
+let selectHist   = document.getElementById("select-hist-mode");
 let selectVrange = document.getElementById( "select-vrange" );
 let inpVmax      = document.getElementById( "inp-vmax"      );
 let inpVmin      = document.getElementById( "inp-vmin"      );
@@ -696,25 +806,25 @@ session.ws.onmessage = function(event) {
 divImage.on( 'plotly_hover', function(event){
     controller.HoverEvent(event,session.ws);
 } );
+
 // response when scroll and pan on the main image
 divImage.on('plotly_relayout', function(event){
     controller.RelayoutEvent(event,session.ws);
 } );
 
 // response when select color range
+function SelectHist(){
+    controller.HistRequest(selectHist.value,session.ws);
+}
 function SelectVrange(){
-    controller.VrangeRequest(selectVrange.value,session.ws);
+    controller.SelectVrange(selectVrange.value);
 };
 inpVmax.addEventListener('change', function(event){
-    controller.InputVmax(event);
+    controller.InputVmax(parseFloat(event.target.value));
 } );
 inpVmin.addEventListener('change', function(event){
-    controller.InputVmin(event);
+    controller.InputVmin(parseFloat(event.target.value));
 } );
-
-//divHist.on('plotly_afterplot', function(event){
-//    alert('new hist plot:',event);
-//});
 
 // response when change channel
 btnChannelFirst.addEventListener( 'click', function(event){
@@ -730,5 +840,5 @@ btnChannelLast.addEventListener( 'click', function(event){
     controller.ChannelBtn(9999,session.ws);
 } );
 inpChannel.addEventListener('change', function(event){
-    controller.InputChannel(event,session.ws);
+    controller.InputChannel(parseInt(event.target.value),session.ws);
 } );

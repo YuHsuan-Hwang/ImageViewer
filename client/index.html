@@ -19,6 +19,10 @@
 
                 <div id="div-hist" style="width:580px;height:190px;">
                     <p id="title-hist">Render Configuration</p>
+                    <select id="select-hist-mode" onchange="SelectHist()">
+                        <option value=1>Per-Cube</option>
+                        <option value=2 selected="selected">Per-Channel</option>
+                    </select>
                     <p id="txt-vrange">Range</p>
                     <select id="select-vrange" onchange="SelectVrange()">
                         <option value=100.0>100%</option>

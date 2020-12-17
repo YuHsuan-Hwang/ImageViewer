@@ -10,6 +10,13 @@ from astropy.io import fits
 import cv2
 import protobufs.imageviewer_pb2 as pb
 
+import multiprocessing
+import concurrent.futures
+from threading import current_thread
+
+#from PIL import Image
+#from skimage.transform import resize
+
 class Model:
 
     def __init__( self, input_filename ):
@@ -27,15 +34,14 @@ class Model:
         self.orig_y_coor_min = None
         self.orig_y_coor_delta = None
 
-        self.vmin = None
-        self.vmax = None
-
         # status of the display image
         self.channel = 0
         self.xmin = 0
         self.x_len_scaled = None # initialize in ReadFits
         self.ymin = 0
         self.y_len_scaled = None
+
+        self.vrange = 99.9
 
         self.x_screensize_in_px = None # initialize in InitDisplayResponse
         self.y_screensize_in_px = None
@@ -46,7 +52,7 @@ class Model:
         time1 = time.time()
 
         # read fits file
-        print("(", datetime.now(), ") read fits file: ", self.filename)
+        print("(", datetime.now(), ") read fits file:", self.filename)
         path = "/Users/yuhsuan/Documents/web-projects/ImageViewer/client/images/"
         hdu_list = fits.open(path+self.filename)
 
@@ -54,6 +60,7 @@ class Model:
         self.x_len = hdu_list[0].header['NAXIS1']
         self.y_len = hdu_list[0].header['NAXIS2']
         self.z_len = hdu_list[0].header['NAXIS3']
+        print("(", datetime.now(), ") x, y, z:",self.x_len, self.y_len, self.z_len)
 
         x_centerpix = hdu_list[0].header['CRPIX1']
         y_centerpix = hdu_list[0].header['CRPIX2']
@@ -65,19 +72,15 @@ class Model:
         self.orig_y_coor_delta = hdu_list[0].header['CDELT2']
         z_coordelta = hdu_list[0].header['CDELT3']
 
-        self.image_data = hdu_list[0].data[0]
-        self.image_data = self.image_data.astype('float32') # for cv2.resize to work
+        print("start read data")
+        self.image_data = np.array( hdu_list[0].data[0], dtype="float32" )
 
         hdu_list.close()
 
         # calculate coordinate
-        self.orig_x_coor_min = x_centervalue - x_centerpix*self.orig_x_coor_delta # the coordinate of the (0,0) bin
-        self.orig_y_coor_min = y_centervalue - y_centerpix*self.orig_y_coor_delta
-        print("(", datetime.now(), ") orig coor min: ", self.orig_x_coor_min, self.orig_y_coor_min )
-
-        # colorbar settings
-        self.vmax = np.nanpercentile( np.nanpercentile( self.image_data, 99.9, axis=1 ), 99.9, axis=1 )
-        self.vmin = np.nanpercentile( np.nanpercentile( self.image_data, 0.1, axis=1 ), 0.1, axis=1 )
+        self.orig_x_coor_min = x_centervalue - (x_centerpix-1)*self.orig_x_coor_delta # the coordinate of the (0,0) bin
+        self.orig_y_coor_min = y_centervalue - (y_centerpix-1)*self.orig_y_coor_delta
+        print("(", datetime.now(), ") orig coor min:", self.orig_x_coor_min, self.orig_y_coor_min )
 
         self.x_len_scaled = self.x_len
         self.y_len_scaled = self.y_len
@@ -85,6 +88,11 @@ class Model:
         time2 = time.time()
         print( "(", datetime.now(), ") read fits file done, time =", (time2-time1)*1000.0 , "millisec")
 
+    def ChangeType( self, i ):
+        #print(i, current_thread())
+        self.image_data[i] =  self.image_data[i].astype( "float32" )
+        #print( i, " done" )
+    
     def OnMessage( self, message_bytes ):
 
         print("(", datetime.now(), ") received raw message: ", message_bytes)
@@ -110,9 +118,9 @@ class Model:
         elif ( event_type==pb.EventType.CHANNEL ):
             return_message_bytes = self.ChannelResponse( request_message )
             return return_message_bytes
-
-        elif ( event_type==pb.EventType.VRANGE ):
-            return_message_bytes = self.VrangeResponse( request_message )
+        
+        elif ( event_type==pb.EventType.HIST ):
+            return_message_bytes = self.HistResponse( request_message )
             return return_message_bytes
 
         else:
@@ -145,16 +153,17 @@ class Model:
 
         # output array
         time1 = time.time()
-        image_data_onechannel = self.image_data[0]
-       
+        image_data_return = self.image_data[0]
+        
+        x, y = self.Histogram( image_data_return )
+        
         if self.y_len>self.y_screensize_in_px:  # image resolution is too high, rebin
-            image_data_return = cv2.resize( image_data_onechannel,
-                                            (self.y_screensize_in_px, self.x_screensize_in_px),
+            image_data_return = cv2.resize( image_data_return,
+                                            (self.x_screensize_in_px, self.y_screensize_in_px),
                                             interpolation=cv2.INTER_AREA )					
             rebin_ratio = self.y_screensize_in_px/self.y_len
 
         else:
-            image_data_return = image_data_onechannel
             rebin_ratio = 1
 
         time2 = time.time()
@@ -168,9 +177,6 @@ class Model:
         response_message.orig_width = self.x_len
         response_message.orig_height = self.y_len
         response_message.channel_num = self.z_len
-
-        response_message.vmin.extend( self.vmin )
-        response_message.vmax.extend( self.vmax )
 
         for j in range( image_data_return.shape[1] ):
             row_data = response_message.image_data.add()
@@ -187,21 +193,18 @@ class Model:
         response_message.x_rebin_ratio = rebin_ratio
         response_message.y_rebin_ratio = rebin_ratio
 
-        response_message.hist_data.extend( self.image_data[self.channel].flatten() )
+        #response_message.hist_data.extend( self.image_data[self.channel].flatten() )
+        response_message.numbers.extend( y )
+        response_message.bins.extend( x )
 
         response_message.task_start_time = message.send_start_time
+        time1 = time.time()
         response_message.send_start_time = round(time1*1000.0)
         
         # encode and send back message
         response_message_bytes = response_message.SerializeToString()
         return_message_bytes = bytes([pb.EventType.INIT_DISPLAY]) + response_message_bytes
         print("(", datetime.now(), ") end task: init display")
-
-        # set condition for channel request (expand the image to 4 times large (len*2))
-        self.xmin = np.ceil( -0.5*self.x_len )
-        self.ymin = np.ceil( -0.5*self.y_len )
-        self.x_len_scaled = 2.0*self.x_len
-        self.y_len_scaled = 2.0*self.y_len
 
         return return_message_bytes
 
@@ -258,6 +261,7 @@ class Model:
         response_message.y_rebin_ratio = y_rebin_ratio
 
         response_message.task_start_time = message.send_start_time
+        time1 = time.time()
         response_message.send_start_time = round(time1*1000.0)
 
         # encode and send back message
@@ -301,6 +305,7 @@ class Model:
         response_message.profile_z.extend( profile_z )
 
         response_message.task_start_time = message.send_start_time
+        time1 = time.time()
         response_message.send_start_time = round(time1*1000.0)
         
         # encode and send back message
@@ -337,6 +342,8 @@ class Model:
         print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
                 self.x_len*self.y_len/(time2-time1)/1000.0, "px/millisec" )
 
+        x, y = self.Histogram( self.image_data[self.channel] )
+
         # set the returning message
         response_message = pb.ChannelResponse()
 
@@ -351,9 +358,12 @@ class Model:
         response_message.x_rebin_ratio = x_rebin_ratio
         response_message.y_rebin_ratio = y_rebin_ratio
 
-        response_message.hist_data.extend( self.image_data[self.channel].flatten() )
+        #response_message.hist_data.extend( self.image_data[self.channel].flatten() )
+        response_message.numbers.extend( y )
+        response_message.bins.extend( x )
         
         response_message.task_start_time = message.send_start_time
+        time1 = time.time()
         response_message.send_start_time = round(time1*1000.0)
         
         # encode and send back message
@@ -362,11 +372,11 @@ class Model:
         print("(", datetime.now(), ") end task: change channel")
 
         return return_message_bytes
-
-    def VrangeResponse( self, message_bytes ):
+    
+    def HistResponse( self, message_bytes ):
 
         # receive and decode the message
-        message = pb.VrangeRequest()
+        message = pb.HistRequest()
         message.ParseFromString(message_bytes)
 
          # print send time
@@ -376,40 +386,45 @@ class Model:
 
         # read message
         time1 = time.time()
-        print("(", datetime.now(), ") start task: change vrange" )
+        print("(", datetime.now(), ") start task: change histogram mode" )
 
-        v_range_percent = message.v_range_percent
+        hist_mode = message.hist_mode
 
         time2 = time.time()
         print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
 
-        # reset colorbar settings
-        self.vmax = np.nanpercentile( np.nanpercentile( self.image_data, v_range_percent, axis=1 ), v_range_percent, axis=1 )
-        self.vmin = np.nanpercentile( np.nanpercentile( self.image_data, 100-v_range_percent, axis=1 ), 100-v_range_percent, axis=1 )
+        # calculate histogram
+        time1 = time.time()
+        if (hist_mode==1): # per-cube
+            x, y = self.Histogram( self.image_data )
+        else: # hist_mode==2, per-channel
+            x, y = self.Histogram( np.array([self.image_data[self.channel]]) )
+
+        time2 = time.time()
+        print( "(", datetime.now(), ") output hist, time =", (time2-time1)*1000.0 , "millisec",
+                self.x_len*self.y_len*self.z_len/(time2-time1)/1000.0, "px/millisec" )
 
         # set the returning message
-        response_message = pb.VrangeResponse()
+        response_message = pb.HistResponse()
 
-        response_message.vmax.extend( self.vmax )
-        response_message.vmin.extend( self.vmin )
-        
+        response_message.numbers.extend( y )
+        response_message.bins.extend( x )
+
         response_message.task_start_time = message.send_start_time
+        time1 = time.time()
         response_message.send_start_time = round(time1*1000.0)
         
         # encode and send back message
         response_message_bytes = response_message.SerializeToString()
-        return_message_bytes = bytes([pb.EventType.VRANGE]) + response_message_bytes
-        print("(", datetime.now(), ") end task: change vrange")
+        return_message_bytes = bytes([pb.EventType.HIST]) + response_message_bytes
+        print("(", datetime.now(), ") end task: change histogram mode")
 
         return return_message_bytes
+        
 
     def ImageArray( self, xmin, ymin, x_len_scaled, y_len_scaled, channel ):
 
-        image_data_onechannel = self.image_data[channel]
-
-        # expand the image to 4 times large (len*2)
-        x_screensize_in_px_scaled = self.x_screensize_in_px*2.0
-        y_screensize_in_px_scaled = self.y_screensize_in_px*2.0
+        image_data_return = self.image_data[channel]
         
         # slice the image
         if (xmin<0): xmin_slice = 0
@@ -422,15 +437,16 @@ class Model:
         if (ymin+y_len_scaled>self.y_len): ymax_slice = self.y_len
         else: ymax_slice = ymin+y_len_scaled
 
-        image_data_return = image_data_onechannel[ ymin_slice:ymax_slice:1, xmin_slice:xmax_slice:1 ]
+        image_data_return =  image_data_return[ ymin_slice:ymax_slice:1, xmin_slice:xmax_slice:1 ]
 
         # calculate required resolution, especially for smaller image
-        x_screensize_in_px_scaled = math.ceil(x_screensize_in_px_scaled * (xmax_slice-xmin_slice)/x_len_scaled)
-        y_screensize_in_px_scaled = math.ceil(y_screensize_in_px_scaled * (ymax_slice-ymin_slice)/y_len_scaled)
+        x_screensize_in_px_scaled = math.ceil(self.x_screensize_in_px * (xmax_slice-xmin_slice)/x_len_scaled)
+        y_screensize_in_px_scaled = math.ceil(self.y_screensize_in_px * (ymax_slice-ymin_slice)/y_len_scaled)
         print( x_screensize_in_px_scaled, y_screensize_in_px_scaled )
 
         # rebin
         if ( (xmax_slice-xmin_slice)>x_screensize_in_px_scaled )|( (ymax_slice-ymin_slice)>y_screensize_in_px_scaled ):
+            print( "rebin" )
             image_data_return = cv2.resize( image_data_return,
                                             (x_screensize_in_px_scaled, y_screensize_in_px_scaled),
                                             interpolation=cv2.INTER_AREA )
@@ -442,6 +458,54 @@ class Model:
 
         return image_data_return, x_rebin_ratio, y_rebin_ratio
 
+    def Hist_thread( self, data_onechannel, bins, range_min, range_max):
+        #y, x = np.histogram( data_onechannel[np.logical_not(np.isnan(data_onechannel))] , bins, range=(range_min,range_max) )
+        y, x = np.histogram( data_onechannel, bins, range=(range_min,range_max) )
+        return y, x
+
+    def Histogram( self, data ):
+
+        '''
+        data_flatten = data.flatten()
+        range_max = np.nanmax(data_flatten)
+        range_min = np.nanmin(data_flatten)
+        bins = int(np.sqrt(len(data_flatten)))
+
+        length = len(data_flatten)
+        print(length)
+
+        y = np.zeros(bins)
+        
+        pool = multiprocessing.Pool(2)
+        y1, x = pool.apply_async( self.Hist_thread, args=(data_flatten[0:length], bins, range_min, range_max) ).get()
+        y2, x = pool.apply_async( self.Hist_thread, args=(data_flatten[length:], bins, range_min, range_max) ).get()
+        pool.close()
+        pool.join()
+
+        y = y1+y2
+        y = y.astype(int)
+        x = x[:-1] + np.ones(len(y))*0.5*(x[1]-x[0])
+        '''
+        time1 = time.time()
+
+        if (data.ndim==3):
+            range_min = np.nanmin( np.nanmin( np.nanmin( data, axis=1 ), axis=1 ) )
+            range_max = np.nanmax( np.nanmax( np.nanmax( data, axis=1 ), axis=1 ) )
+            bin_num = int((self.x_len*self.y_len*self.z_len)**0.333)
+        else: # data.ndim==2
+            range_min = np.nanmin( np.nanmin( data, axis=1 ) )
+            range_max = np.nanmax( np.nanmax( data, axis=1 ) )
+            bin_num = int(np.sqrt(self.x_len*self.y_len))
+
+        print(bin_num,range_min,range_max)
+
+        y, x = np.histogram( data, bin_num, range=(range_min,range_max) )
+        x = x[:-1] + np.ones(len(y))*0.5*(x[1]-x[0])
+
+        time2 = time.time()
+        print( "(", datetime.now(), ") output histogram, time =", (time2-time1)*1000.0 , "millisec")
+
+        return x, y
 
 class Server:
 
@@ -493,6 +557,8 @@ async def OneClientTask( ws, path ):
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5.cube.I.pbcor.fits" )
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits" )
         model = Model( "HD163296_CO_2_1.fits" )
+        #model = Model( "S255_IR_sci.spw29.cube.I.pbcor.fits" )
+        
         #model = Model( "vla_3ghz_msmf.fits" )
         #model = Model( "mips_24_GO3_sci_10.fits" )
         #model = Model( "cluster_08192.fits" )

@@ -62,6 +62,13 @@ p {
     top: -195px;
     left: 10px;
 }
+
+#select-hist-mode {
+    position: relative;
+    top: -194px;
+    left: 446px;
+    width:122px;
+}
 #txt-vrange {
     position: relative;
     top: -194px;
@@ -71,6 +78,7 @@ p {
     position: relative;
     top: -230px;
     left: 495px;
+    width:72px;
 }
 #txt-vmax {
     position: relative;
@@ -82,6 +90,7 @@ p {
     top: -270px;
     left: 496px;
     line-height: 1em;
+    width:65px;
 }
 #txt-vmin {
     position: relative;
@@ -93,6 +102,7 @@ p {
     top: -310px;
     left: 496px;
     line-height: 1em;
+    width:65px;
 }
 
 #title-profile-x {

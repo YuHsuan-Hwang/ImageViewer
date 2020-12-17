@@ -8,7 +8,7 @@ enum EventType {
     ZOOM = 2;
     PROFILE = 3;
     CHANNEL = 4;
-    VRANGE = 5;
+    HIST = 5;
 
 }
 
@@ -47,10 +47,10 @@ message ChannelRequest {
 
 }
 
-message VrangeRequest {
+message HistRequest {
 
     int64 send_start_time = 1; // the start time of sending the message
-    float v_range_percent = 2;
+    int32 hist_mode = 2;
 
 }
 
@@ -63,9 +63,6 @@ message InitDisplayResponse {
     int32 orig_width = 4;
     int32 orig_height = 5;
     int32 channel_num = 6;
-
-    repeated float vmin = 7;
-    repeated float vmax = 8;
 
     message OneRow {
         repeated float point_data = 1;
@@ -83,7 +80,9 @@ message InitDisplayResponse {
     float x_rebin_ratio = 16;
     float y_rebin_ratio = 17;
 
-    repeated float hist_data = 18;
+    //repeated float hist_data = 18;
+    repeated int64 numbers = 18; // data y
+    repeated float bins = 19; // data x
 
 }
 
@@ -131,19 +130,24 @@ message ChannelResponse {
     int32 image_width = 5;
     int32 image_height = 6;
 
-    float x_rebin_ratio = 7;
-    float y_rebin_ratio = 8;
+    float vmin = 7;
+    float vmax = 8;
 
-    repeated float hist_data = 9;
+    float x_rebin_ratio = 9;
+    float y_rebin_ratio = 10;
+
+    //repeated float hist_data = 9;
+    repeated int64 numbers = 11; // data y
+    repeated float bins = 12; // data x
 
 }
 
-message VrangeResponse {
+message HistResponse {
 
     int64 task_start_time = 1;
     int64 send_start_time = 2; // the start time of sending the message
 
-    repeated float vmin = 3;
-    repeated float vmax = 4;
+    repeated int64 numbers = 3; // data y
+    repeated float bins = 4; // data x
 
 }
