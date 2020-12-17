@@ -41,6 +41,11 @@ class Model:
         self.ymin = 0
         self.y_len_scaled = None
 
+        self.xmin_slice = 0
+        self.xmax_slice = None
+        self.ymin_slice = 0
+        self.ymax_slice = None
+
         self.vrange = 99.9
 
         self.x_screensize_in_px = None # initialize in InitDisplayResponse
@@ -294,8 +299,8 @@ class Model:
         print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
 
         # output profiles
-        profile_x = self.image_data[self.channel,position_y,:]
-        profile_y = self.image_data[self.channel,:,position_x]
+        profile_x = self.image_data[self.channel,position_y,self.xmin_slice:self.xmax_slice]
+        profile_y = self.image_data[self.channel,self.ymin_slice:self.ymax_slice,position_x]
         profile_z = self.image_data[:,position_x,position_y]
 
         # set the returning message
@@ -427,31 +432,31 @@ class Model:
         image_data_return = self.image_data[channel]
         
         # slice the image
-        if (xmin<0): xmin_slice = 0
-        else: xmin_slice = xmin
-        if (ymin<0): ymin_slice = 0
-        else: ymin_slice = ymin
+        if (xmin<0): self.xmin_slice = 0
+        else: self.xmin_slice = xmin
+        if (ymin<0): self.ymin_slice = 0
+        else: self.ymin_slice = ymin
 
-        if (xmin+x_len_scaled>self.y_len): xmax_slice = self.y_len
-        else: xmax_slice = xmin+x_len_scaled
-        if (ymin+y_len_scaled>self.y_len): ymax_slice = self.y_len
-        else: ymax_slice = ymin+y_len_scaled
+        if (xmin+x_len_scaled>self.y_len): self.xmax_slice = self.y_len
+        else: self.xmax_slice = xmin+x_len_scaled
+        if (ymin+y_len_scaled>self.y_len): self.ymax_slice = self.y_len
+        else: self.ymax_slice = ymin+y_len_scaled
 
-        image_data_return =  image_data_return[ ymin_slice:ymax_slice:1, xmin_slice:xmax_slice:1 ]
+        image_data_return =  image_data_return[ self.ymin_slice:self.ymax_slice:1, self.xmin_slice:self.xmax_slice:1 ]
 
         # calculate required resolution, especially for smaller image
-        x_screensize_in_px_scaled = math.ceil(self.x_screensize_in_px * (xmax_slice-xmin_slice)/x_len_scaled)
-        y_screensize_in_px_scaled = math.ceil(self.y_screensize_in_px * (ymax_slice-ymin_slice)/y_len_scaled)
+        x_screensize_in_px_scaled = math.ceil(self.x_screensize_in_px * (self.xmax_slice-self.xmin_slice)/x_len_scaled)
+        y_screensize_in_px_scaled = math.ceil(self.y_screensize_in_px * (self.ymax_slice-self.ymin_slice)/y_len_scaled)
         print( x_screensize_in_px_scaled, y_screensize_in_px_scaled )
 
         # rebin
-        if ( (xmax_slice-xmin_slice)>x_screensize_in_px_scaled )|( (ymax_slice-ymin_slice)>y_screensize_in_px_scaled ):
+        if ( (self.xmax_slice-self.xmin_slice)>x_screensize_in_px_scaled )|( (self.ymax_slice-self.ymin_slice)>y_screensize_in_px_scaled ):
             print( "rebin" )
             image_data_return = cv2.resize( image_data_return,
                                             (x_screensize_in_px_scaled, y_screensize_in_px_scaled),
                                             interpolation=cv2.INTER_AREA )
-            x_rebin_ratio = (x_screensize_in_px_scaled)/(xmax_slice-xmin_slice)                                
-            y_rebin_ratio = (y_screensize_in_px_scaled)/(ymax_slice-ymin_slice)
+            x_rebin_ratio = (x_screensize_in_px_scaled)/(self.xmax_slice-self.xmin_slice)                                
+            y_rebin_ratio = (y_screensize_in_px_scaled)/(self.ymax_slice-self.ymin_slice)
         else:
             x_rebin_ratio = 1
             y_rebin_ratio = 1

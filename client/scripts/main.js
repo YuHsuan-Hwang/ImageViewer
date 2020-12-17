@@ -61,7 +61,10 @@ class View{
         this.channel = 0; // x, y pixel length after zooming, current channel
         this.x_coor_min, this.x_coor_delta, this.y_coor_min, this.y_coor_delta; // coordinate min and delta, the "value" of the bins, in degree after zooming
         this.x_range_min, this.x_range_max, this.y_range_min, this.y_range_max; // coordinate display range, the "edge" of the image, in degree after zooming
+        this.x_min = 0, this.y_min = 0;  // coordinate min in px after zooming, relative to the orig data, for plotting profiles
         this.cursor_value = [0,0,0,0,0]; // position and value of the cursor (orig image): x_px, y_px, x_ra, y_dec, z_value
+        this.cursor_pos = [0,0];
+        this.x_rebin_ratio = 1, this.y_rebin_ratio = 1; // rebin status
     }
 
     // setup all the interface with blanck figures
@@ -166,15 +169,30 @@ class View{
 
     // update profile data
     UpdateProfile() {
-        Plotly.update( this.div_profile_x, { y:[this.profile_x] },
+        Plotly.update( this.div_profile_x, { y:[this.profile_x], x0:[this.x_min], dx:[1] },
                        { shapes:[{type:'line',x0:this.cursor_value[0],x1:this.cursor_value[0],y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] } );
-        Plotly.update( this.div_profile_y, { y:[this.profile_y] }, 
+        Plotly.update( this.div_profile_y, { y:[this.profile_y], x0:[this.y_min], dx:[1] }, 
                        { shapes:[{type:'line',x0:this.cursor_value[1],x1:this.cursor_value[1],y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] } );
         Plotly.update( this.div_profile_z, { y:[this.profile_z] },
                        { shapes:[{type:'line',x0:this.channel,        x1:this.channel,        y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] });
     }
+    UpdateProfileTmp() {
+        Plotly.update( this.div_profile_x, { y:[this.image_data[this.channel][this.cursor_pos[1]]], x0:[this.x_min], dx:[1/this.x_rebin_ratio] },
+            { shapes:[{type:'line',x0:this.cursor_value[0],x1:this.cursor_value[0],y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] } );
+        Plotly.update( this.div_profile_y, { y:[this.ArrayColumn(this.image_data[this.channel],this.cursor_pos[0])], x0:[this.y_min], dx:[1/this.y_rebin_ratio] }, 
+            { shapes:[{type:'line',x0:this.cursor_value[1],x1:this.cursor_value[1],y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] } );
+    }
+    ArrayColumn(arr, n) {
+        return arr.map(x=> x[n]);
+    }
+      
 
 }
+
+
+
+
+
 
 /**
  * properties for calling new image data
@@ -193,13 +211,14 @@ class Controller{
 
         // mouse event parameter
         this.hover_function_call = false; // set to true after init display is complete
+        this.hover_timer;
+        this.hover_interval = 50;
 
         // required info when displaying new image
         this.scale = 1; // zoom status
         this.xmin = 0, this.ymin = 0; // in orig px size
         this.request_width, this.request_height; // in orig px size
         this.width, this.height; // rebinned size
-        this.x_rebin_ratio = 1, this.y_rebin_ratio = 1; // rebin status
         this.v_range_percent = 99.9; // range percentage of the color scale
     }
 
@@ -223,8 +242,6 @@ class Controller{
     RelayoutEvent( event, ws ) {
         if( this.relayout_call ) { // trigger zooming after the new zoomed image is plotted
 
-            this.zoom_request_num+=1;
-
             //this.relayout_call = false;
             //this.hover_function_call = false;
 
@@ -240,6 +257,15 @@ class Controller{
             this.request_width  = 1+Math.ceil( (event["xaxis.range"][1]-event["xaxis.range"][0])/this.view.orig_x_coor_delta );
             this.request_height = 1+Math.ceil( (event["yaxis.range"][1]-event["yaxis.range"][0])/this.view.orig_y_coor_delta );
             //console.log( this.xmin, this.ymin, this.request_width, this.request_height );
+
+            this.view.x_min = this.xmin;
+            this.view.y_min = this.ymin;
+            if (this.view.x_min<0){
+                this.view.x_min = 0;
+            }
+            if (this.view.y_min<0){
+                this.view.y_min = 0;
+            }
 
             /* // for heatmap
             // read the new axis range
@@ -265,11 +291,11 @@ class Controller{
                 window.clearTimeout(this.zoom_timer); // default the timer
                 console.log("set up zoom_timer");
                 this.zoom_timer =  window.setTimeout( () => { // arrow function, or "this" will become "window object" if use traditional function syntax
-                console.log("send zoom request");
+                    console.log("send zoom request");
                     this.ZoomRequest( ws );
                     this.relayout_call = false;
                     this.hover_function_call = false;
-                }, this.zoom_interval ); // reopen the access to send zoom request after a time interval
+                }, this.zoom_interval );
 
             }
         
@@ -296,7 +322,11 @@ class Controller{
 
     // response to cursor hover events
     HoverEvent( event, ws ) {
+
         if (this.hover_function_call){ // detect mouse position after the new image is plotted
+
+            this.view.cursor_pos[0] = event.points[0].pointNumber[1];
+            this.view.cursor_pos[1] = event.points[0].pointNumber[0];
 
             let x_px = parseInt( 0.5+(event.points[0].x-this.view.orig_x_coor_min)/this.view.orig_x_coor_delta ); // px in orig image
             let y_px = parseInt( 0.5+(event.points[0].y-this.view.orig_y_coor_min)/this.view.orig_y_coor_delta ); // px in orig image
@@ -307,9 +337,17 @@ class Controller{
             // update cursor_value
             this.view.cursor_value = [ x_px, y_px, x, y, z ];
 
-            // display cursor info and send profile request to the backend
+            // display cursor info
             this.view.UpdateTxtCursor();
-            this.ProfileRequest(x_px, y_px, ws);
+            this.view.UpdateProfileTmp();
+
+            // manage the time interval and send profile request to the backend
+            window.clearTimeout(this.hover_timer); // default the timer
+                console.log("set up hover_timer");
+                this.hover_timer =  window.setTimeout( () => {
+                console.log("send hover request");
+                this.ProfileRequest(x_px, y_px, ws);
+            }, this.hover_interval );            
         }     
     }
 
@@ -520,8 +558,8 @@ class Controller{
         this.view.hist_data_x = return_message.getBinsList();
 
         // update image info
-        this.x_rebin_ratio  = return_message.getXRebinRatio();
-        this.y_rebin_ratio  = return_message.getYRebinRatio();
+        this.view.x_rebin_ratio  = return_message.getXRebinRatio();
+        this.view.y_rebin_ratio  = return_message.getYRebinRatio();
 
         console.log(new Date(),"read message: ", Date.now()-time1, "millisec" )
 
@@ -530,10 +568,10 @@ class Controller{
         this.view.x_range_max = this.view.orig_x_coor_min + (this.view.orig_width-0.5)*this.view.orig_x_coor_delta;
         this.view.y_range_min = this.view.orig_y_coor_min - 0.5*this.view.orig_y_coor_delta;
         this.view.y_range_max = this.view.orig_y_coor_min + (this.view.orig_height-0.5)*this.view.orig_y_coor_delta;
-        this.view.x_coor_min = this.view.x_range_min + 0.5*this.view.orig_x_coor_delta/this.x_rebin_ratio;
-        this.view.x_coor_delta = this.view.orig_x_coor_delta/this.x_rebin_ratio;
-        this.view.y_coor_min = this.view.y_range_min + 0.5*this.view.orig_y_coor_delta/this.y_rebin_ratio;
-        this.view.y_coor_delta = this.view.orig_y_coor_delta/this.y_rebin_ratio;
+        this.view.x_coor_min = this.view.x_range_min + 0.5*this.view.orig_x_coor_delta/this.view.x_rebin_ratio;
+        this.view.x_coor_delta = this.view.orig_x_coor_delta/this.view.x_rebin_ratio;
+        this.view.y_coor_min = this.view.y_range_min + 0.5*this.view.orig_y_coor_delta/this.view.y_rebin_ratio;
+        this.view.y_coor_delta = this.view.orig_y_coor_delta/this.view.y_rebin_ratio;
 
         // update image data for display
         this.view.vmin = Array(this.view.channel_num).fill(-9999)
@@ -591,25 +629,25 @@ class Controller{
         this.view.image_data[return_message.getChannel()] = data;
 
         // update image info
-        this.x_rebin_ratio = return_message.getXRebinRatio();
-        this.y_rebin_ratio = return_message.getYRebinRatio();
+        this.view.x_rebin_ratio = return_message.getXRebinRatio();
+        this.view.y_rebin_ratio = return_message.getYRebinRatio();
 
         console.log(new Date(),"read message: ", Date.now()-time1, "millisec" )
 
 
         // calculate new coordinate
         if ( this.xmin<0 ) {
-            this.view.x_coor_min = this.view.orig_x_coor_min - 0.5*this.view.orig_x_coor_delta + 0.5*this.view.orig_x_coor_delta/this.x_rebin_ratio;
+            this.view.x_coor_min = this.view.orig_x_coor_min - 0.5*this.view.orig_x_coor_delta + 0.5*this.view.orig_x_coor_delta/this.view.x_rebin_ratio;
         } else {
-            this.view.x_coor_min = this.view.orig_x_coor_min + (this.xmin-0.5)*this.view.orig_x_coor_delta + 0.5*this.view.orig_x_coor_delta/this.x_rebin_ratio;
+            this.view.x_coor_min = this.view.orig_x_coor_min + (this.xmin-0.5)*this.view.orig_x_coor_delta + 0.5*this.view.orig_x_coor_delta/this.view.x_rebin_ratio;
         }
         if ( this.ymin<0 ) {
-            this.view.y_coor_min = this.view.orig_y_coor_min - 0.5*this.view.orig_y_coor_delta + 0.5*this.view.orig_y_coor_delta/this.y_rebin_ratio;
+            this.view.y_coor_min = this.view.orig_y_coor_min - 0.5*this.view.orig_y_coor_delta + 0.5*this.view.orig_y_coor_delta/this.view.y_rebin_ratio;
         } else {
-            this.view.y_coor_min = this.view.orig_y_coor_min + (this.ymin-0.5)*this.view.orig_y_coor_delta + 0.5*this.view.orig_y_coor_delta/this.y_rebin_ratio;
+            this.view.y_coor_min = this.view.orig_y_coor_min + (this.ymin-0.5)*this.view.orig_y_coor_delta + 0.5*this.view.orig_y_coor_delta/this.view.y_rebin_ratio;
         }
-        this.view.x_coor_delta = this.view.orig_x_coor_delta / this.x_rebin_ratio;
-        this.view.y_coor_delta = this.view.orig_y_coor_delta / this.y_rebin_ratio;
+        this.view.x_coor_delta = this.view.orig_x_coor_delta / this.view.x_rebin_ratio;
+        this.view.y_coor_delta = this.view.orig_y_coor_delta / this.view.y_rebin_ratio;
         
         // display image
         this.view.UpdateDisplay();
