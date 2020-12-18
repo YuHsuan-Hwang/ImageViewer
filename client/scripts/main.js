@@ -282,22 +282,19 @@ class Controller{
             //console.log( this.xmin, this.ymin, this.request_width, this.request_height );
             */
 
-            if( (this.request_width<=0)||(this.request_height<=0) ) { // stop zooming if the length is zero
-                this.view.Redisplay();
-            } else {
-                //this.ZoomRequest( ws );
+            //if( (this.request_width<this.view.orig_width)||(this.request_height<this.view.orig_width) ) { // ask for new data if zoom in
 
-                // manage the time interval
-                window.clearTimeout(this.zoom_timer); // default the timer
-                console.log("set up zoom_timer");
-                this.zoom_timer =  window.setTimeout( () => { // arrow function, or "this" will become "window object" if use traditional function syntax
-                    console.log("send zoom request");
-                    this.ZoomRequest( ws );
-                    this.relayout_call = false;
-                    this.hover_function_call = false;
-                }, this.zoom_interval );
+            // manage the time interval
+            window.clearTimeout(this.zoom_timer); // default the timer
+            console.log("set up zoom_timer");
+            this.zoom_timer =  window.setTimeout( () => { // arrow function, or "this" will become "window object" if use traditional function syntax
+                console.log("send zoom request");
+                this.ZoomRequest( ws );
+                this.relayout_call = false;
+                this.hover_function_call = false;
+            }, this.zoom_interval );
 
-            }
+            //}
         
         }else {
             // replot the image back to the same range instead of zooming

@@ -7,15 +7,18 @@ from datetime import datetime
 import websockets
 import asyncio
 from astropy.io import fits
-import cv2
+
 import protobufs.imageviewer_pb2 as pb
 
 import multiprocessing
 import concurrent.futures
 from threading import current_thread
 
-#from PIL import Image
+
+from PIL import Image
+#import cv2
 #from skimage.transform import resize
+#import scipy.ndimage
 
 class Model:
 
@@ -45,8 +48,6 @@ class Model:
         self.xmax_slice = None
         self.ymin_slice = 0
         self.ymax_slice = None
-
-        self.vrange = 99.9
 
         self.x_screensize_in_px = None # initialize in InitDisplayResponse
         self.y_screensize_in_px = None
@@ -78,7 +79,8 @@ class Model:
         z_coordelta = hdu_list[0].header['CDELT3']
 
         print("start read data")
-        self.image_data = np.array( hdu_list[0].data[0], dtype="float32" )
+        self.image_data = hdu_list[0].data[0]
+        #self.image_data = self.image_data.astype("float32")
 
         hdu_list.close()
 
@@ -163,10 +165,11 @@ class Model:
         x, y = self.Histogram( image_data_return )
         
         if self.y_len>self.y_screensize_in_px:  # image resolution is too high, rebin
-            image_data_return = cv2.resize( image_data_return,
-                                            (self.x_screensize_in_px, self.y_screensize_in_px),
-                                            interpolation=cv2.INTER_AREA )					
+
+            image_data_return = np.array( Image.fromarray(image_data_return).resize(size=(self.x_screensize_in_px, self.y_screensize_in_px)) )
+
             rebin_ratio = self.y_screensize_in_px/self.y_len
+
 
         else:
             rebin_ratio = 1
@@ -452,9 +455,9 @@ class Model:
         # rebin
         if ( (self.xmax_slice-self.xmin_slice)>x_screensize_in_px_scaled )|( (self.ymax_slice-self.ymin_slice)>y_screensize_in_px_scaled ):
             print( "rebin" )
-            image_data_return = cv2.resize( image_data_return,
-                                            (x_screensize_in_px_scaled, y_screensize_in_px_scaled),
-                                            interpolation=cv2.INTER_AREA )
+
+            image_data_return = np.array( Image.fromarray(image_data_return).resize(size=(x_screensize_in_px_scaled, y_screensize_in_px_scaled)) )
+
             x_rebin_ratio = (x_screensize_in_px_scaled)/(self.xmax_slice-self.xmin_slice)                                
             y_rebin_ratio = (y_screensize_in_px_scaled)/(self.ymax_slice-self.ymin_slice)
         else:
@@ -463,36 +466,30 @@ class Model:
 
         return image_data_return, x_rebin_ratio, y_rebin_ratio
 
-    def Hist_thread( self, data_onechannel, bins, range_min, range_max):
-        #y, x = np.histogram( data_onechannel[np.logical_not(np.isnan(data_onechannel))] , bins, range=(range_min,range_max) )
-        y, x = np.histogram( data_onechannel, bins, range=(range_min,range_max) )
-        return y, x
+    def CalMax( self, i ):
+        #print(multiprocessing.current_process())
+        return np.nanmax( self.image_data[0][i] )
+
+    def CalMin( self, data ):
+        #print(multiprocessing.current_process())
+        return np.nanmin( data )
 
     def Histogram( self, data ):
-
-        '''
-        data_flatten = data.flatten()
-        range_max = np.nanmax(data_flatten)
-        range_min = np.nanmin(data_flatten)
-        bins = int(np.sqrt(len(data_flatten)))
-
-        length = len(data_flatten)
-        print(length)
-
-        y = np.zeros(bins)
         
-        pool = multiprocessing.Pool(2)
-        y1, x = pool.apply_async( self.Hist_thread, args=(data_flatten[0:length], bins, range_min, range_max) ).get()
-        y2, x = pool.apply_async( self.Hist_thread, args=(data_flatten[length:], bins, range_min, range_max) ).get()
-        pool.close()
-        pool.join()
-
-        y = y1+y2
-        y = y.astype(int)
-        x = x[:-1] + np.ones(len(y))*0.5*(x[1]-x[0])
-        '''
         time1 = time.time()
 
+        '''
+        range_max = np.nanmax(range_max)
+        range_min = np.nanmin(range_min)
+
+        
+        if (data.ndim==3):
+            bin_num = int((self.x_len*self.y_len*self.z_len)**0.333)
+        else:
+            bin_num = int(np.sqrt(self.x_len*self.y_len))
+
+        '''
+        
         if (data.ndim==3):
             range_min = np.nanmin( np.nanmin( np.nanmin( data, axis=1 ), axis=1 ) )
             range_max = np.nanmax( np.nanmax( np.nanmax( data, axis=1 ), axis=1 ) )
@@ -501,11 +498,13 @@ class Model:
             range_min = np.nanmin( np.nanmin( data, axis=1 ) )
             range_max = np.nanmax( np.nanmax( data, axis=1 ) )
             bin_num = int(np.sqrt(self.x_len*self.y_len))
+        
 
         print(bin_num,range_min,range_max)
 
         y, x = np.histogram( data, bin_num, range=(range_min,range_max) )
         x = x[:-1] + np.ones(len(y))*0.5*(x[1]-x[0])
+
 
         time2 = time.time()
         print( "(", datetime.now(), ") output histogram, time =", (time2-time1)*1000.0 , "millisec")
