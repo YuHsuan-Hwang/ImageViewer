@@ -52,7 +52,6 @@ class Model:
         self.x_screensize_in_px = None # initialize in InitDisplayResponse
         self.y_screensize_in_px = None
 
-
     def ReadFits( self ):
 
         time1 = time.time()
@@ -94,11 +93,6 @@ class Model:
 
         time2 = time.time()
         print( "(", datetime.now(), ") read fits file done, time =", (time2-time1)*1000.0 , "millisec")
-
-    def ChangeType( self, i ):
-        #print(i, current_thread())
-        self.image_data[i] =  self.image_data[i].astype( "float32" )
-        #print( i, " done" )
     
     def OnMessage( self, message_bytes ):
 
@@ -129,10 +123,10 @@ class Model:
         elif ( event_type==pb.EventType.HIST ):
             return_message_bytes = self.HistResponse( request_message )
             return return_message_bytes
-
+        
         else:
             print("(", datetime.now(), ")!!!unknown message!!!")
-        
+
 
     def InitDisplayResponse( self, message_bytes ):
 
@@ -162,8 +156,8 @@ class Model:
         time1 = time.time()
         image_data_return = self.image_data[0]
         
-        x, y = self.Histogram( image_data_return )
-        
+        x, y = self.Histogram( 2 )
+
         if self.y_len>self.y_screensize_in_px:  # image resolution is too high, rebin
 
             image_data_return = np.array( Image.fromarray(image_data_return).resize(size=(self.x_screensize_in_px, self.y_screensize_in_px)) )
@@ -200,7 +194,7 @@ class Model:
 
         response_message.x_rebin_ratio = rebin_ratio
         response_message.y_rebin_ratio = rebin_ratio
-
+        
         #response_message.hist_data.extend( self.image_data[self.channel].flatten() )
         response_message.numbers.extend( y )
         response_message.bins.extend( x )
@@ -249,7 +243,7 @@ class Model:
 
         # output array
         time1 = time.time()
-        image_data_return, x_rebin_ratio, y_rebin_ratio = self.ImageArray( xmin, ymin, x_len_scaled, y_len_scaled, channel )
+        image_data_return, x_rebin_ratio, y_rebin_ratio = self.ImageArrayModel( xmin, ymin, x_len_scaled, y_len_scaled, channel )
         time2 = time.time()
         print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
                 self.x_len*self.y_len/(time2-time1)/1000.0, "px/millisec" )
@@ -278,6 +272,7 @@ class Model:
         print("(", datetime.now(), ") end task: zoom image")
 
         return return_message_bytes
+
 
     def ProfileResponse( self, message_bytes ):
 
@@ -345,12 +340,12 @@ class Model:
 
         # output array
         time1 = time.time()
-        image_data_return, x_rebin_ratio, y_rebin_ratio = self.ImageArray( self.xmin, self.ymin, self.x_len_scaled, self.y_len_scaled, self.channel )
+        image_data_return, x_rebin_ratio, y_rebin_ratio = self.ImageArrayModel( self.xmin, self.ymin, self.x_len_scaled, self.y_len_scaled, self.channel )
         time2 = time.time()
         print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
                 self.x_len*self.y_len/(time2-time1)/1000.0, "px/millisec" )
 
-        x, y = self.Histogram( self.image_data[self.channel] )
+        x, y = self.Histogram( 2 )
 
         # set the returning message
         response_message = pb.ChannelResponse()
@@ -404,9 +399,9 @@ class Model:
         # calculate histogram
         time1 = time.time()
         if (hist_mode==1): # per-cube
-            x, y = self.Histogram( self.image_data )
+            x, y = self.Histogram( 1 )
         else: # hist_mode==2, per-channel
-            x, y = self.Histogram( np.array([self.image_data[self.channel]]) )
+            x, y = self.Histogram( 2 )
 
         time2 = time.time()
         print( "(", datetime.now(), ") output hist, time =", (time2-time1)*1000.0 , "millisec",
@@ -428,9 +423,9 @@ class Model:
         print("(", datetime.now(), ") end task: change histogram mode")
 
         return return_message_bytes
-        
 
-    def ImageArray( self, xmin, ymin, x_len_scaled, y_len_scaled, channel ):
+
+    def ImageArrayModel( self, xmin, ymin, x_len_scaled, y_len_scaled, channel ):
 
         image_data_return = self.image_data[channel]
         
@@ -466,43 +461,96 @@ class Model:
 
         return image_data_return, x_rebin_ratio, y_rebin_ratio
 
+    
     def CalMax( self, i ):
-        #print(multiprocessing.current_process())
-        return np.nanmax( self.image_data[0][i] )
+        print(multiprocessing.current_process())
+        return np.nanmax( self.image_data[i] )
+
+   # def CalMax( self, data ):
+   #     print(data.shape, multiprocessing.current_process())
+   #     return np.nanmax( data )
 
     def CalMin( self, data ):
         #print(multiprocessing.current_process())
         return np.nanmin( data )
 
-    def Histogram( self, data ):
+    def Histogram( self, mode ):
         
         time1 = time.time()
 
-        '''
-        range_max = np.nanmax(range_max)
-        range_min = np.nanmin(range_min)
+        if (mode==1): # per cube
 
-        
-        if (data.ndim==3):
+            
+           # with concurrent.futures.ProcessPoolExecutor() as executor:
+            #    print("start process pool")
+            #    range_max = np.zeros(self.z_len)
+            #    for i in range(self.z_len):
+            #        print("submit process")
+            #        range_max[i] = executor.submit(self.CalMax, i )
+                #range_min = executor.map(self.CalMin, self.image_data)
+
+            #range_max = np.nanmax(range_max)
+            #range_min = min(range_min)
+            #print(range_max)#, range_min)
+            
+            time2 = time.time()
+            print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
+            time1 = time.time()
+            
+            print("cal max")
+            range_max = np.zeros(self.z_len)
+            for i in range(self.z_len):
+                range_max[i] = np.nanmax( self.image_data[i] )
+                if(i%100==0):print(i)
+            range_max = np.nanmax( range_max )
+            time2 = time.time()
+            print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
+            time1 = time.time()
+
+            print("cal min")
+            range_min = np.zeros(self.z_len)
+            for i in range(self.z_len):
+                range_min[i] = np.nanmin( self.image_data[i] )
+                if(i%100==0):print(i)
+            range_min = np.nanmin( range_min )
+            time2 = time.time()
+            print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
+            time1 = time.time()
+
             bin_num = int((self.x_len*self.y_len*self.z_len)**0.333)
-        else:
+
+            print(bin_num,range_min,range_max)
+
+            #y, x = np.histogram( self.image_data, bin_num, range=(range_min,range_max) )
+
+            x = np.zeros(bin_num)
+            y = np.zeros(bin_num,dtype=np.int64)
+            for i in range(self.z_len):
+                y_onechannel, x = np.histogram( self.image_data[i], bin_num, range=(range_min,range_max) )
+                y += y_onechannel
+                if(i%100==0):print(i)
+            
+        else: # mode==2, per channel
+            print("cal max")
+            range_max = np.zeros(self.y_len)
+            for i in range(self.y_len):
+                range_max[i] = np.nanmax( self.image_data[self.channel][i] )
+                if(i%100==0):print(i)
+            range_max = np.nanmax( range_max )
+            
+            print("cal min")
+            range_min = np.zeros(self.y_len)
+            for i in range(self.y_len):
+                range_min[i] = np.nanmin( self.image_data[self.channel][i] )
+                if(i%100==0):print(i)
+            range_min = np.nanmin( range_min )
+
             bin_num = int(np.sqrt(self.x_len*self.y_len))
 
-        '''
-        
-        if (data.ndim==3):
-            range_min = np.nanmin( np.nanmin( np.nanmin( data, axis=1 ), axis=1 ) )
-            range_max = np.nanmax( np.nanmax( np.nanmax( data, axis=1 ), axis=1 ) )
-            bin_num = int((self.x_len*self.y_len*self.z_len)**0.333)
-        else: # data.ndim==2
-            range_min = np.nanmin( np.nanmin( data, axis=1 ) )
-            range_max = np.nanmax( np.nanmax( data, axis=1 ) )
-            bin_num = int(np.sqrt(self.x_len*self.y_len))
-        
+            print(bin_num,range_min,range_max)
 
-        print(bin_num,range_min,range_max)
-
-        y, x = np.histogram( data, bin_num, range=(range_min,range_max) )
+            y, x = np.histogram( self.image_data[self.channel], bin_num, range=(range_min,range_max) )
+        
         x = x[:-1] + np.ones(len(y))*0.5*(x[1]-x[0])
 
 
@@ -510,7 +558,7 @@ class Model:
         print( "(", datetime.now(), ") output histogram, time =", (time2-time1)*1000.0 , "millisec")
 
         return x, y
-
+    
 class Server:
 
     def __init__( self, input_ip, input_port ):
@@ -560,8 +608,8 @@ async def OneClientTask( ws, path ):
 
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5.cube.I.pbcor.fits" )
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits" )
-        model = Model( "HD163296_CO_2_1.fits" )
-        #model = Model( "S255_IR_sci.spw29.cube.I.pbcor.fits" )
+        #model = Model( "HD163296_CO_2_1.fits" )
+        model = Model( "S255_IR_sci.spw29.cube.I.pbcor.fits" )
         
         #model = Model( "vla_3ghz_msmf.fits" )
         #model = Model( "mips_24_GO3_sci_10.fits" )

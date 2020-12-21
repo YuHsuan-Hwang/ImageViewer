@@ -37,6 +37,7 @@ class View{
         // web elements
         this.div_image = input_div_image;
         this.txt_filename = input_txt_filename;
+
         this.txt_cursor = input_txt_cursor;
         this.div_hist = input_div_hist;
         this.inp_vmax = input_inp_vmax;
@@ -44,6 +45,7 @@ class View{
         this.div_profile_x = input_div_profilex;
         this.div_profile_y = input_div_profiley;
         this.div_profile_z = input_div_profilez;
+
 
         // original info of the image (initialized in controller.InitDisplayResponse)
         this.filename;
@@ -53,8 +55,8 @@ class View{
         // image data for display (updated in controller.XxxxResponse)
         this.vmin, this.vmax; // colorscale min and max
         this.image_data = [[0]]; // main display image, 3d data, change with controller.scale
-        //this.hist_data; // histogram of the current channel, change with view.channel
-        this.hist_data_y, this.hist_data_x;
+        
+        this.hist_data_y, this.hist_data_x; // histogram of the current channel, change with view.channel
         this.profile_x, this.profile_y, this.profile_z; // profile of the current cursor position and channel, change with view.corsor_value and view.channel
 
         // status of the display image
@@ -62,8 +64,10 @@ class View{
         this.x_coor_min, this.x_coor_delta, this.y_coor_min, this.y_coor_delta; // coordinate min and delta, the "value" of the bins, in degree after zooming
         this.x_range_min, this.x_range_max, this.y_range_min, this.y_range_max; // coordinate display range, the "edge" of the image, in degree after zooming
         this.x_min = 0, this.y_min = 0;  // coordinate min in px after zooming, relative to the orig data, for plotting profiles
+
         this.cursor_value = [0,0,0,0,0]; // position and value of the cursor (orig image): x_px, y_px, x_ra, y_dec, z_value
         this.cursor_pos = [0,0];
+
         this.x_rebin_ratio = 1, this.y_rebin_ratio = 1; // rebin status
     }
 
@@ -82,11 +86,11 @@ class View{
         }
         Plotly.react( this.div_image, [{z:[[0]],type:'heatmapgl',showscale:false, zsmooth:false, colorscale:'Viridis',hoverinfo:"none"}],
                       heatmap_layout, {displayModeBar:false,displaylogo:false,scrollZoom:true} ); // Plotly.react runs slightly faster than Plotly.newPlot
-
+        
        let hist_layout = {
             autosize:false, width:580, height:190, margin:{ l:70, r:150, b:40, t:40 },
-            xaxis:{ title:"Value",       color:'royalblue', linecolor:'royalblue', mirror:true },
-            yaxis:{ title:"log(Number)", color:'royalblue', linecolor:'royalblue', mirror:true, type:'log' },
+            xaxis:{ title:"Value",  color:'royalblue', linecolor:'royalblue', mirror:true },
+            yaxis:{ title:"Number", color:'royalblue', linecolor:'royalblue', mirror:true, type:'log' },
             paper_bgcolor:'Aliceblue', bargap:0,
             shapes:[{type:'line',x0:0.01, x1:0.01,y0:0, y1:1,yref:'paper',line:{color:'lightpink', width:1}},
             {type:'line',x0:-0.01,x1:-0.01,y0:0,y1:1,yref:'paper',line:{color:'lightgreen',width:1}}]
@@ -115,6 +119,7 @@ class View{
         Plotly.react( this.div_profile_x, [{y:[],type:'bar',opacity: 0.4}], bar_layout_x, {displaylogo:false} );
         Plotly.react( this.div_profile_y, [{y:[],type:'bar',opacity: 0.4}], bar_layout_y, {displaylogo:false} );
         Plotly.react( this.div_profile_z, [{y:[],type:'bar',opacity: 0.4}], bar_layout_z, {displaylogo:false} );
+
     }
 
     // show the filename
@@ -133,6 +138,7 @@ class View{
                          'yaxis.range':[this.y_range_min,this.y_range_max] } )
         console.log(new Date(),"image display: ", Date.now()-time1, "millisec" )  
     }
+    
     // change color scale of the main image
     UpdateDisplayVrange(){
         Plotly.restyle( this.div_image, { zmin:this.vmin[this.channel], zmax:this.vmax[this.channel] } );
@@ -166,7 +172,7 @@ class View{
                                 + "), Image: (" + this.cursor_value[2].toFixed(5) + "," + this.cursor_value[3].toFixed(5)
                                 + "), Value: "  + this.cursor_value[4].toExponential(5);
     }
-
+    
     // update profile data
     UpdateProfile() {
         Plotly.update( this.div_profile_x, { y:[this.profile_x], x0:[this.x_min], dx:[1] },
@@ -185,7 +191,7 @@ class View{
     ArrayColumn(arr, n) {
         return arr.map(x=> x[n]);
     }
-      
+ 
 
 }
 
@@ -214,12 +220,15 @@ class Controller{
         this.hover_timer;
         this.hover_interval = 50;
 
+
         // required info when displaying new image
         this.scale = 1; // zoom status
         this.xmin = 0, this.ymin = 0; // in orig px size
         this.request_width, this.request_height; // in orig px size
         this.width, this.height; // rebinned size
+        
         this.v_range_percent = 99.9; // range percentage of the color scale
+        
     }
 
     // initial setup after open the browser
@@ -239,7 +248,7 @@ class Controller{
         this.SendRequest( [1], request_message.serializeBinary(), ws ) // 1: INIT_DISPLAY
     }
 
-    RelayoutEvent( event, ws ) {
+    ZoomEvent( event, ws ) {
         if( this.relayout_call ) { // trigger zooming after the new zoomed image is plotted
 
             //this.relayout_call = false;
@@ -474,7 +483,7 @@ class Controller{
         // encode and send
         this.SendRequest( [5], request_message.serializeBinary(), ws ) // 5: HIST
     }
-
+    
     SendRequest( event_type, request_message_bytes, ws ) {
         let message_bytes = new Uint8Array( request_message_bytes.length+1 );
         message_bytes.set( event_type, 0 );
@@ -487,6 +496,7 @@ class Controller{
             console.log("send request reject");
         }
     }
+    
 
     // receive message from the backend
     OnMessage( raw_message ) {
@@ -496,7 +506,7 @@ class Controller{
         console.log(new Date(),"received message: ", return_message_bytes );
         
         let event_type = return_message_bytes[0];
-        return_message_bytes = return_message_bytes.slice(1);
+        return_message_bytes = return_message_bytes.slice(1); // slice from index 1 to end
         console.log(new Date(),"event_type: ", event_type );
 
         // trigger certain response
@@ -569,7 +579,8 @@ class Controller{
         this.view.x_coor_delta = this.view.orig_x_coor_delta/this.view.x_rebin_ratio;
         this.view.y_coor_min = this.view.y_range_min + 0.5*this.view.orig_y_coor_delta/this.view.y_rebin_ratio;
         this.view.y_coor_delta = this.view.orig_y_coor_delta/this.view.y_rebin_ratio;
-
+        
+        
         // update image data for display
         this.view.vmin = Array(this.view.channel_num).fill(-9999)
         this.view.vmax = Array(this.view.channel_num).fill(-9999)
@@ -592,6 +603,7 @@ class Controller{
             }
         }
         
+       
         // display image
         this.view.UpdateFilename();
         this.view.UpdateDisplay();
@@ -811,7 +823,6 @@ let btnChannelNext  = document.getElementById( "btn-channel-next"  );
 let btnChannelLast  = document.getElementById( "btn-channel-last"  );
 let inpChannel      = document.getElementById( "inp-channel"       );
 
-
 // setup image display
 let view = new View( divImage, txtFilename, txtCursor, divHist, inpVmax, inpVmin, divProfileX, divProfileY, divProfileZ );
 let controller = new Controller( view );
@@ -837,14 +848,15 @@ session.ws.onmessage = function(event) {
 };
 
 // web element events
+// response when scroll and pan on the main image
+divImage.on('plotly_relayout', function(event){
+    controller.ZoomEvent(event,session.ws);
+} );
+
+
 // response when the cursor move to different pixels
 divImage.on( 'plotly_hover', function(event){
     controller.HoverEvent(event,session.ws);
-} );
-
-// response when scroll and pan on the main image
-divImage.on('plotly_relayout', function(event){
-    controller.RelayoutEvent(event,session.ws);
 } );
 
 // response when select color range

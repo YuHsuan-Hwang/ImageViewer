@@ -80,7 +80,6 @@ message InitDisplayResponse {
     float x_rebin_ratio = 16;
     float y_rebin_ratio = 17;
 
-    //repeated float hist_data = 18;
     repeated int64 numbers = 18; // data y
     repeated float bins = 19; // data x
 
@@ -104,6 +103,7 @@ message ZoomResponse {
     float y_rebin_ratio = 8;
 
 }
+
 
 message ProfileResponse {
 

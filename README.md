@@ -1,5 +1,6 @@
 # Image Viewer
 Read and display fits files
+![](https://i.imgur.com/xz9YjZ2.png)
 
 ## Current Features
 * display cube data
@@ -7,13 +8,13 @@ Read and display fits files
 * show image histogram, adjust color scale
 * show x,y,z profile of the cursor position
 * change image channel
+* show histogram of the whole cube data
 
 ## Issues
 * x axis coordinate does not show after reversed x axis
 * cursor jumps to different positions when zooming
 
 ## Future Work
-* show histogram of the whole cube data
 * backend scheduling
 * rebin x,y,z profile
 * compress response message
