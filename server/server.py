@@ -461,48 +461,49 @@ class Model:
 
         return image_data_return, x_rebin_ratio, y_rebin_ratio
 
-    
-    def CalMax( self, i ):
-        print(multiprocessing.current_process())
-        return np.nanmax( self.image_data[i] )
-
-   # def CalMax( self, data ):
-   #     print(data.shape, multiprocessing.current_process())
-   #     return np.nanmax( data )
-
-    def CalMin( self, data ):
-        #print(multiprocessing.current_process())
-        return np.nanmin( data )
-
     def Histogram( self, mode ):
         
         time1 = time.time()
 
         if (mode==1): # per cube
 
-            
-           # with concurrent.futures.ProcessPoolExecutor() as executor:
-            #    print("start process pool")
-            #    range_max = np.zeros(self.z_len)
-            #    for i in range(self.z_len):
-            #        print("submit process")
-            #        range_max[i] = executor.submit(self.CalMax, i )
-                #range_min = executor.map(self.CalMin, self.image_data)
+            range_max = np.zeros(self.z_len)
+            range_min = np.zeros(self.z_len)
 
-            #range_max = np.nanmax(range_max)
-            #range_min = min(range_min)
-            #print(range_max)#, range_min)
+            def CalMax( data, i ): return i, np.nanmax( data )
+            def CalMin( data, i ): return i, np.nanmin( data )
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                print("start thread pool")
+                for row, result in executor.map( CalMax, self.image_data, range(self.z_len) ):
+                    range_max[row] = result
+                for row, result in executor.map( CalMin, self.image_data, range(self.z_len) ):
+                    range_min[row] = result
             
             time2 = time.time()
             print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
             time1 = time.time()
+
+            range_max = np.nanmax(range_max)
+            print(range_max)
+            range_min = np.nanmin(range_min)
+            print(range_min)
+
+            time2 = time.time()
+            print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
+            time1 = time.time()
             
+            '''
             print("cal max")
             range_max = np.zeros(self.z_len)
             for i in range(self.z_len):
                 range_max[i] = np.nanmax( self.image_data[i] )
                 if(i%100==0):print(i)
+            
+            print(range_max[100])
             range_max = np.nanmax( range_max )
+            print(range_max)
+
             time2 = time.time()
             print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
             time1 = time.time()
@@ -516,20 +517,28 @@ class Model:
             time2 = time.time()
             print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
             time1 = time.time()
-
+            '''
             bin_num = int((self.x_len*self.y_len*self.z_len)**0.333)
 
             print(bin_num,range_min,range_max)
 
-            #y, x = np.histogram( self.image_data, bin_num, range=(range_min,range_max) )
+            y = np.zeros(bin_num,dtype=np.int64)
+            def CalHist( data ): return np.histogram( data, bin_num, range=(range_min,range_max) )
 
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                print("start thread pool")
+                for y_return, x_return in executor.map( CalHist, self.image_data ):
+                    y += y_return
+                    x = x_return
+            '''
             x = np.zeros(bin_num)
             y = np.zeros(bin_num,dtype=np.int64)
             for i in range(self.z_len):
                 y_onechannel, x = np.histogram( self.image_data[i], bin_num, range=(range_min,range_max) )
                 y += y_onechannel
                 if(i%100==0):print(i)
-            
+            '''
+
         else: # mode==2, per channel
             print("cal max")
             range_max = np.zeros(self.y_len)
