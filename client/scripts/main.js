@@ -63,7 +63,7 @@ class View{
         this.channel = 0; // x, y pixel length after zooming, current channel
         this.x_coor_min, this.x_coor_delta, this.y_coor_min, this.y_coor_delta; // coordinate min and delta, the "value" of the bins, in degree after zooming
         this.x_range_min, this.x_range_max, this.y_range_min, this.y_range_max; // coordinate display range, the "edge" of the image, in degree after zooming
-        this.x_min = 0, this.y_min = 0;  // coordinate min in px after zooming, relative to the orig data, for plotting profiles
+        this.x_min = 0, this.x_max, this.y_min = 0, this.y_max;  // coordinate in px after zooming, relative to the orig data, for plotting profiles
 
         this.cursor_value = [0,0,0,0,0]; // position and value of the cursor (orig image): x_px, y_px, x_ra, y_dec, z_value
         this.cursor_pos = [0,0];
@@ -95,30 +95,30 @@ class View{
             shapes:[{type:'line',x0:0.01, x1:0.01,y0:0, y1:1,yref:'paper',line:{color:'lightpink', width:1}},
             {type:'line',x0:-0.01,x1:-0.01,y0:0,y1:1,yref:'paper',line:{color:'lightgreen',width:1}}]
         }
-        Plotly.react( this.div_hist, [{y:[],type:'bar',opacity: 0.4}], hist_layout, {displaylogo:false});
+        Plotly.react( this.div_hist, [{y:[], type:'bar',opacity: 0.4}], hist_layout, {displaylogo:false});
 
         // setup x, y, z profile panels
         let bar_layout_x = {
-            autosize:false, width:700, height:190, margin:{ l:70, r:20, b:40, t:40 },
+            autosize:false, width:700, height:190, dragmode:"pan", margin:{ l:70, r:20, b:40, t:40 },
             xaxis:{ title:"X Coordinate", color:'royalblue', linecolor:'royalblue', mirror:true },
-            yaxis:{ title:"Value",        color:'royalblue', linecolor:'royalblue', mirror:true },
+            yaxis:{ title:"Value",        color:'royalblue', linecolor:'royalblue', mirror:true, fixedrange:true },
             paper_bgcolor:'Aliceblue', bargap:0
         }
         let bar_layout_y = {
-            autosize:false, width:700, height:190, margin:{ l:70, r:20, b:40, t:40 },
+            autosize:false, width:700, height:190, dragmode:"pan", margin:{ l:70, r:20, b:40, t:40 },
             xaxis:{ title:"Y Coordinate", color:'royalblue', linecolor:'royalblue', mirror:true },
-            yaxis:{ title:"Value",        color:'royalblue', linecolor:'royalblue', mirror:true },
+            yaxis:{ title:"Value",        color:'royalblue', linecolor:'royalblue', mirror:true, fixedrange:true },
             paper_bgcolor:'Aliceblue', bargap:0
         }
         let bar_layout_z = {
-            autosize:false, width:700, height:190, margin:{ l:70, r:20, b:40, t:40 },
+            autosize:false, width:700, height:190, dragmode:"pan", margin:{ l:70, r:20, b:40, t:40 },
             xaxis:{ title:"Channel", color:'royalblue', linecolor:'royalblue', mirror:true },
             yaxis:{ title:"Value",   color:'royalblue', linecolor:'royalblue', mirror:true },
             paper_bgcolor:'Aliceblue', bargap:0
         }
-        Plotly.react( this.div_profile_x, [{y:[],type:'bar',opacity: 0.4}], bar_layout_x, {displaylogo:false} );
-        Plotly.react( this.div_profile_y, [{y:[],type:'bar',opacity: 0.4}], bar_layout_y, {displaylogo:false} );
-        Plotly.react( this.div_profile_z, [{y:[],type:'bar',opacity: 0.4}], bar_layout_z, {displaylogo:false} );
+        Plotly.react( this.div_profile_x, [{y:[],type:'bar',opacity: 0.4}], bar_layout_x, {displaylogo:false,scrollZoom:true,doubleClick: false} );
+        Plotly.react( this.div_profile_y, [{y:[],type:'bar',opacity: 0.4}], bar_layout_y, {displaylogo:false,scrollZoom:true,doubleClick: false} );
+        Plotly.react( this.div_profile_z, [{y:[],type:'bar',opacity: 0.4}], bar_layout_z, {displaylogo:false,scrollZoom:true,doubleClick: false} );
 
     }
 
@@ -147,11 +147,12 @@ class View{
     Redisplay(){
         console.log(new Date(),"zoom reject");
         Plotly.update( this.div_image, {}, { 'xaxis.range':[this.x_range_min,this.x_range_max],'yaxis.range':[this.y_range_min,this.y_range_max] } )
+        // use update instead of relayout to avoid keep calling on("plotly_relayout")
     }
 
     // update histogram data
     UpdateHist(){       
-        Plotly.update( this.div_hist, {y:[this.hist_data_y],x:[this.hist_data_x]},//{x:[this.hist_data]},
+        Plotly.update( this.div_hist, {y:[this.hist_data_y],x:[this.hist_data_x]},
             { shapes:[{type:'line',x0:this.vmax[this.channel],x1:this.vmax[this.channel],y0:0,y1:1,yref:'paper',line:{color:'lightpink',width:2}},
                       {type:'line',x0:this.vmin[this.channel],x1:this.vmin[this.channel],y0:0,y1:1,yref:'paper',line:{color:'lightgreen',width:2}}] });
         this.inp_vmax.value = this.vmax[this.channel];
@@ -175,10 +176,12 @@ class View{
     
     // update profile data
     UpdateProfile() {
-        Plotly.update( this.div_profile_x, { y:[this.profile_x], x0:[this.x_min], dx:[1] },
-                       { shapes:[{type:'line',x0:this.cursor_value[0],x1:this.cursor_value[0],y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] } );
-        Plotly.update( this.div_profile_y, { y:[this.profile_y], x0:[this.y_min], dx:[1] }, 
-                       { shapes:[{type:'line',x0:this.cursor_value[1],x1:this.cursor_value[1],y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] } );
+        Plotly.update( this.div_profile_x, { y:[this.profile_x], x0:[0], dx:[1] },
+                       { 'xaxis.range':[this.x_min,this.x_max],
+                         shapes:[{type:'line',x0:this.cursor_value[0],x1:this.cursor_value[0],y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] } );
+        Plotly.update( this.div_profile_y, { y:[this.profile_y], x0:[0], dx:[1] }, 
+                       { 'xaxis.range':[this.y_min,this.y_max],
+                         shapes:[{type:'line',x0:this.cursor_value[1],x1:this.cursor_value[1],y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] } );
         Plotly.update( this.div_profile_z, { y:[this.profile_z] },
                        { shapes:[{type:'line',x0:this.channel,        x1:this.channel,        y0:0, y1:1,yref:'paper',line:{color:'grey',width:2}}] });
     }
@@ -190,6 +193,12 @@ class View{
     }
     ArrayColumn(arr, n) {
         return arr.map(x=> x[n]);
+    }
+    ResetProfileX() {
+        Plotly.relayout( this.div_profile_x, { 'xaxis.range':[this.x_min,this.x_max] } );
+    }
+    ResetProfileY() {
+        Plotly.relayout( this.div_profile_y, { 'xaxis.range':[this.y_min,this.y_max] } );
     }
  
 
@@ -249,7 +258,8 @@ class Controller{
     }
 
     ZoomEvent( event, ws ) {
-        if( this.relayout_call ) { // trigger zooming after the new zoomed image is plotted
+        if( (this.relayout_call)&&(event["xaxis.range"][0]!=this.view.x_range_min)&&(event["xaxis.range"][1]!=this.view.x_range_max)&&(event["yaxis.range"][0]!=this.view.y_range_min)&&(event["yaxis.range"][1]!=this.view.y_range_max) ) {
+            // trigger zooming after the new zoomed image is plotted
 
             //this.relayout_call = false;
             //this.hover_function_call = false;
@@ -267,14 +277,7 @@ class Controller{
             this.request_height = 1+Math.ceil( (event["yaxis.range"][1]-event["yaxis.range"][0])/this.view.orig_y_coor_delta );
             //console.log( this.xmin, this.ymin, this.request_width, this.request_height );
 
-            this.view.x_min = this.xmin;
-            this.view.y_min = this.ymin;
-            if (this.view.x_min<0){
-                this.view.x_min = 0;
-            }
-            if (this.view.y_min<0){
-                this.view.y_min = 0;
-            }
+ 
 
             /* // for heatmap
             // read the new axis range
@@ -291,7 +294,22 @@ class Controller{
             //console.log( this.xmin, this.ymin, this.request_width, this.request_height );
             */
 
-            //if( (this.request_width<this.view.orig_width)||(this.request_height<this.view.orig_width) ) { // ask for new data if zoom in
+            this.view.x_min = this.xmin;
+            this.view.y_min = this.ymin;
+            if (this.view.x_min<0){
+                this.view.x_min = 0;
+            }
+            if (this.view.y_min<0){
+                this.view.y_min = 0;
+            }
+            this.view.x_max = this.xmin + this.request_width - 1;
+            this.view.y_max = this.ymin + this.request_height - 1;
+            if (this.view.x_max>=this.view.orig_width) {
+                this.view.x_max = this.view.orig_width - 1;
+            }
+            if (this.view.y_max>=this.view.orig_height) {
+                this.view.y_max = this.view.orig_height - 1;
+            }
 
             // manage the time interval
             window.clearTimeout(this.zoom_timer); // default the timer
@@ -331,30 +349,39 @@ class Controller{
 
         if (this.hover_function_call){ // detect mouse position after the new image is plotted
 
-            this.view.cursor_pos[0] = event.points[0].pointNumber[1];
-            this.view.cursor_pos[1] = event.points[0].pointNumber[0];
+            if ( (event.points[0].pointNumber[1]!=this.view.cursor_pos[0])||(event.points[0].pointNumber[0]!=this.view.cursor_pos[1]) ) {
+                this.view.cursor_pos[0] = event.points[0].pointNumber[1];
+                this.view.cursor_pos[1] = event.points[0].pointNumber[0];
 
-            let x_px = parseInt( 0.5+(event.points[0].x-this.view.orig_x_coor_min)/this.view.orig_x_coor_delta ); // px in orig image
-            let y_px = parseInt( 0.5+(event.points[0].y-this.view.orig_y_coor_min)/this.view.orig_y_coor_delta ); // px in orig image
-            let x = event.points[0].x; // ra
-            let y = event.points[0].y; // dec
-            let z = event.points[0].z; // value
-            
-            // update cursor_value
-            this.view.cursor_value = [ x_px, y_px, x, y, z ];
+                let x_px = parseInt( 0.5+(event.points[0].x-this.view.orig_x_coor_min)/this.view.orig_x_coor_delta ); // px in orig image
+                let y_px = parseInt( 0.5+(event.points[0].y-this.view.orig_y_coor_min)/this.view.orig_y_coor_delta ); // px in orig image
+                let x = event.points[0].x; // ra
+                let y = event.points[0].y; // dec
+                let z = event.points[0].z; // value
+                
+                // update cursor_value
+                this.view.cursor_value = [ x_px, y_px, x, y, z ];
 
-            // display cursor info
-            this.view.UpdateTxtCursor();
-            this.view.UpdateProfileTmp();
+                // display cursor info
+                this.view.UpdateTxtCursor();
+                this.view.UpdateProfileTmp();
 
-            // manage the time interval and send profile request to the backend
-            window.clearTimeout(this.hover_timer); // default the timer
-                console.log("set up hover_timer");
-                this.hover_timer =  window.setTimeout( () => {
-                console.log("send hover request");
-                this.ProfileRequest(x_px, y_px, ws);
-            }, this.hover_interval );            
-        }     
+                // manage the time interval and send profile request to the backend
+                window.clearTimeout(this.hover_timer); // default the timer
+                    console.log("set up hover_timer");
+                    this.hover_timer =  window.setTimeout( () => {
+                    console.log("send hover request");
+                    this.ProfileRequest(x_px, y_px, ws);
+                }, this.hover_interval );            
+            }  
+        }   
+    }
+
+    ResetProfileX(){
+        view.ResetProfileX();
+    }
+    ResetProfileY(){
+        view.ResetProfileY();
     }
 
     // send profile request
@@ -466,7 +493,18 @@ class Controller{
         this.view.UpdateHistVrange();
         selectVrange.value=-9999;
     }
+    SelectHist( hist_mode,ws ) {
+        if (hist_mode==1) {
 
+            modal.style.display = "block"
+            this.HistRequest( hist_mode,ws )
+
+        } else { // hist_mode==2
+            this.HistRequest( hist_mode,ws )
+        }
+    }
+
+    
     HistRequest( hist_mode,ws ) {
 
         // reset vmin, vmax if not in Custom mode
@@ -579,6 +617,8 @@ class Controller{
         this.view.x_coor_delta = this.view.orig_x_coor_delta/this.view.x_rebin_ratio;
         this.view.y_coor_min = this.view.y_range_min + 0.5*this.view.orig_y_coor_delta/this.view.y_rebin_ratio;
         this.view.y_coor_delta = this.view.orig_y_coor_delta/this.view.y_rebin_ratio;
+        this.view.x_max = this.view.orig_width - 1;
+        this.view.y_max = this.view.orig_height - 1;
         
         
         // update image data for display
@@ -794,6 +834,8 @@ class Controller{
         // display image
         this.view.UpdateDisplayVrange();
         this.view.UpdateHist();
+
+        modal.style.display = "none"
     }
 
 }
@@ -833,6 +875,12 @@ let session = new Session("ws://localhost:5675/");
 // initial setup of the web page
 controller.InitSetup();
 
+
+let modal = document.querySelector(".modal")
+
+
+
+
 // WebSocket events
 session.ws.onopen = function(event) {
     session.OnOpen();
@@ -861,7 +909,7 @@ divImage.on( 'plotly_hover', function(event){
 
 // response when select color range
 function SelectHist(){
-    controller.HistRequest(selectHist.value,session.ws);
+    controller.SelectHist(selectHist.value,session.ws);
 }
 function SelectVrange(){
     controller.SelectVrange(selectVrange.value);
@@ -872,6 +920,13 @@ inpVmax.addEventListener('change', function(event){
 inpVmin.addEventListener('change', function(event){
     controller.InputVmin(parseFloat(event.target.value));
 } );
+
+divProfileX.on('plotly_doubleclick', function() {
+    controller.ResetProfileX();
+});
+divProfileY.on('plotly_doubleclick', function() {
+    controller.ResetProfileY();
+});
 
 // response when change channel
 btnChannelFirst.addEventListener( 'click', function(event){

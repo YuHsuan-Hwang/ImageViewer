@@ -13,7 +13,7 @@ import protobufs.imageviewer_pb2 as pb
 import multiprocessing
 import concurrent.futures
 from threading import current_thread
-
+from threading import active_count
 
 from PIL import Image
 #import cv2
@@ -146,7 +146,7 @@ class Model:
         self.x_screensize_in_px, self.y_screensize_in_px = message.x_screensize_in_px, message.y_screensize_in_px # 500*2, 500*2
         
         # for testing
-        self.x_screensize_in_px, self.y_screensize_in_px = int(self.x_screensize_in_px/10), int(self.y_screensize_in_px/10) # test with lower resolution: 100, 100
+        #self.x_screensize_in_px, self.y_screensize_in_px = int(self.x_screensize_in_px/10), int(self.y_screensize_in_px/10) # test with lower resolution: 100, 100
         #self.x_screensize_in_px, self.y_screensize_in_px = int(self.x_screensize_in_px/100), int(self.y_screensize_in_px/100) # test with lower resolution: 10, 10
 
         time2 = time.time()
@@ -297,9 +297,11 @@ class Model:
         print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
 
         # output profiles
-        profile_x = self.image_data[self.channel,position_y,self.xmin_slice:self.xmax_slice]
-        profile_y = self.image_data[self.channel,self.ymin_slice:self.ymax_slice,position_x]
-        profile_z = self.image_data[:,position_x,position_y]
+        #profile_x = self.image_data[self.channel,position_y,self.xmin_slice:self.xmax_slice]
+        #profile_y = self.image_data[self.channel,self.ymin_slice:self.ymax_slice,position_x]
+        profile_x = self.image_data[self.channel,position_y,:]
+        profile_y = self.image_data[self.channel,:,position_x]
+        profile_z = self.image_data[:,position_y,position_x]
 
         # set the returning message
         response_message = pb.ProfileResponse()
@@ -461,6 +463,7 @@ class Model:
 
         return image_data_return, x_rebin_ratio, y_rebin_ratio
 
+
     def Histogram( self, mode ):
         
         time1 = time.time()
@@ -470,15 +473,15 @@ class Model:
             range_max = np.zeros(self.z_len)
             range_min = np.zeros(self.z_len)
 
-            def CalMax( data, i ): return i, np.nanmax( data )
-            def CalMin( data, i ): return i, np.nanmin( data )
-
+            def CalMaxMin( i ):
+                data = self.image_data[i]
+                range_max[i] = np.nanmax( data )
+                range_min[i] = np.nanmin( data )
+                return
+        
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 print("start thread pool")
-                for row, result in executor.map( CalMax, self.image_data, range(self.z_len) ):
-                    range_max[row] = result
-                for row, result in executor.map( CalMin, self.image_data, range(self.z_len) ):
-                    range_min[row] = result
+                executor.map( CalMaxMin, range(self.z_len) )
             
             time2 = time.time()
             print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
@@ -492,66 +495,37 @@ class Model:
             time2 = time.time()
             print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
             time1 = time.time()
-            
-            '''
-            print("cal max")
-            range_max = np.zeros(self.z_len)
-            for i in range(self.z_len):
-                range_max[i] = np.nanmax( self.image_data[i] )
-                if(i%100==0):print(i)
-            
-            print(range_max[100])
-            range_max = np.nanmax( range_max )
-            print(range_max)
 
-            time2 = time.time()
-            print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
-            time1 = time.time()
-
-            print("cal min")
-            range_min = np.zeros(self.z_len)
-            for i in range(self.z_len):
-                range_min[i] = np.nanmin( self.image_data[i] )
-                if(i%100==0):print(i)
-            range_min = np.nanmin( range_min )
-            time2 = time.time()
-            print( "(", datetime.now(), ") test time", (time2-time1)*1000.0 , "millisec")
-            time1 = time.time()
-            '''
             bin_num = int((self.x_len*self.y_len*self.z_len)**0.333)
 
             print(bin_num,range_min,range_max)
 
-            y = np.zeros(bin_num,dtype=np.int64)
-            def CalHist( data ): return np.histogram( data, bin_num, range=(range_min,range_max) )
+            y = np.zeros( [self.z_len,bin_num],dtype=np.int64 )
+            x = np.linspace( range_min, range_max, bin_num )
+            x += np.ones(len(x))*0.5*(x[1]-x[0])
 
-            with concurrent.futures.ThreadPoolExecutor() as executor:
+            def CalHist( i ):
+                y[i], _ = np.histogram( self.image_data[i], bin_num, range=(range_min,range_max) )
+                return
+            
+            with concurrent.futures.ThreadPoolExecutor(4) as executor:
                 print("start thread pool")
-                for y_return, x_return in executor.map( CalHist, self.image_data ):
-                    y += y_return
-                    x = x_return
-            '''
-            x = np.zeros(bin_num)
-            y = np.zeros(bin_num,dtype=np.int64)
-            for i in range(self.z_len):
-                y_onechannel, x = np.histogram( self.image_data[i], bin_num, range=(range_min,range_max) )
-                y += y_onechannel
-                if(i%100==0):print(i)
-            '''
+                executor.map( CalHist, range(self.z_len) )
+            
+            y = np.sum( y, axis=0 )
+
 
         else: # mode==2, per channel
             print("cal max")
             range_max = np.zeros(self.y_len)
             for i in range(self.y_len):
                 range_max[i] = np.nanmax( self.image_data[self.channel][i] )
-                if(i%100==0):print(i)
             range_max = np.nanmax( range_max )
             
             print("cal min")
             range_min = np.zeros(self.y_len)
             for i in range(self.y_len):
                 range_min[i] = np.nanmin( self.image_data[self.channel][i] )
-                if(i%100==0):print(i)
             range_min = np.nanmin( range_min )
 
             bin_num = int(np.sqrt(self.x_len*self.y_len))
@@ -559,8 +533,7 @@ class Model:
             print(bin_num,range_min,range_max)
 
             y, x = np.histogram( self.image_data[self.channel], bin_num, range=(range_min,range_max) )
-        
-        x = x[:-1] + np.ones(len(y))*0.5*(x[1]-x[0])
+            x = x[:-1] + np.ones(len(y))*0.5*(x[1]-x[0])
 
 
         time2 = time.time()
@@ -617,8 +590,8 @@ async def OneClientTask( ws, path ):
 
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5.cube.I.pbcor.fits" )
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits" )
-        #model = Model( "HD163296_CO_2_1.fits" )
-        model = Model( "S255_IR_sci.spw29.cube.I.pbcor.fits" )
+        model = Model( "HD163296_CO_2_1.fits" )
+        #model = Model( "S255_IR_sci.spw29.cube.I.pbcor.fits" )
         
         #model = Model( "vla_3ghz_msmf.fits" )
         #model = Model( "mips_24_GO3_sci_10.fits" )
