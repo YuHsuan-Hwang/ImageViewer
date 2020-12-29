@@ -15,8 +15,8 @@ Read and display fits files
     * show cursor position
 
 ## Issues
-* x axis coordinate does not show after reversed x axis
-* cursor jumps to different positions when zooming
+* x axis coordinate is not shown when negative dx is used
+* zooming is blocked when showing new profile data
 
 ## Future Work
 * animation

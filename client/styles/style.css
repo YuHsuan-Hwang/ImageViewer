@@ -157,6 +157,18 @@ p {
     left: 90px;;
     line-height: 1em;
 }
+/*
+#btn-channel-play {
+    position: relative;
+    top: -15px;
+    left: -55px;
+}
+#btn-channel-stop {
+    position: relative;
+    top: -15px;
+    left: -55px;
+}
+*/
 
 .modal {
     display: none;

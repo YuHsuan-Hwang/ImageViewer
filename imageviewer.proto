@@ -130,16 +130,9 @@ message ChannelResponse {
     int32 image_width = 5;
     int32 image_height = 6;
 
-    float vmin = 7;
-    float vmax = 8;
-
-    float x_rebin_ratio = 9;
-    float y_rebin_ratio = 10;
-
-    //repeated float hist_data = 9;
-    repeated int64 numbers = 11; // data y
-    repeated float bins = 12; // data x
-
+    float x_rebin_ratio = 7;
+    float y_rebin_ratio = 8;
+    
 }
 
 message HistResponse {

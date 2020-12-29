@@ -155,22 +155,19 @@ class Model:
         # output array
         time1 = time.time()
         image_data_return = self.image_data[0]
-        
-        x, y = self.Histogram( 2 )
 
         if self.y_len>self.y_screensize_in_px:  # image resolution is too high, rebin
-
             image_data_return = np.array( Image.fromarray(image_data_return).resize(size=(self.x_screensize_in_px, self.y_screensize_in_px)) )
-
             rebin_ratio = self.y_screensize_in_px/self.y_len
-
-
         else:
             rebin_ratio = 1
 
         time2 = time.time()
         print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
                 self.x_len*self.y_len/(time2-time1)/1000.0, "px/millisec" )
+        
+        # output histogram
+        x, y = self.Histogram( 2 )
 
         # set the returning message
         response_message = pb.InitDisplayResponse()
@@ -195,7 +192,6 @@ class Model:
         response_message.x_rebin_ratio = rebin_ratio
         response_message.y_rebin_ratio = rebin_ratio
         
-        #response_message.hist_data.extend( self.image_data[self.channel].flatten() )
         response_message.numbers.extend( y )
         response_message.bins.extend( x )
 
@@ -225,28 +221,18 @@ class Model:
         time1 = time.time()
         print("(", datetime.now(), ") start task: zoom image" )
 
-        channel = message.channel
-        xmin = message.xmin
-        ymin = message.ymin
-        x_len_scaled = message.width
-        y_len_scaled = message.height
+        self.channel = message.channel
+        self.xmin = message.xmin
+        self.ymin = message.ymin
+        self.x_len_scaled = message.width
+        self.y_len_scaled = message.height
 
         time2 = time.time()
         print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
 
-        # update status
-        self.xmin = xmin
-        self.ymin = ymin
-        self.x_len_scaled =  x_len_scaled
-        self.y_len_scaled = y_len_scaled
-        self.channel = channel
-
         # output array
-        time1 = time.time()
-        image_data_return, x_rebin_ratio, y_rebin_ratio = self.ImageArrayModel( xmin, ymin, x_len_scaled, y_len_scaled, channel )
-        time2 = time.time()
-        print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
-                self.x_len*self.y_len/(time2-time1)/1000.0, "px/millisec" )
+        image_data_return, x_rebin_ratio, y_rebin_ratio = self.ImageArrayModel( self.xmin, self.ymin, self.x_len_scaled, self.y_len_scaled, self.channel )
+        
 
         # set the returning message
         response_message = pb.ZoomResponse()
@@ -297,8 +283,6 @@ class Model:
         print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
 
         # output profiles
-        #profile_x = self.image_data[self.channel,position_y,self.xmin_slice:self.xmax_slice]
-        #profile_y = self.image_data[self.channel,self.ymin_slice:self.ymax_slice,position_x]
         profile_x = self.image_data[self.channel,position_y,:]
         profile_y = self.image_data[self.channel,:,position_x]
         profile_z = self.image_data[:,position_y,position_x]
@@ -341,12 +325,9 @@ class Model:
         print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
 
         # output array
-        time1 = time.time()
         image_data_return, x_rebin_ratio, y_rebin_ratio = self.ImageArrayModel( self.xmin, self.ymin, self.x_len_scaled, self.y_len_scaled, self.channel )
-        time2 = time.time()
-        print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
-                self.x_len*self.y_len/(time2-time1)/1000.0, "px/millisec" )
 
+        # output histogram
         x, y = self.Histogram( 2 )
 
         # set the returning message
@@ -363,7 +344,6 @@ class Model:
         response_message.x_rebin_ratio = x_rebin_ratio
         response_message.y_rebin_ratio = y_rebin_ratio
 
-        #response_message.hist_data.extend( self.image_data[self.channel].flatten() )
         response_message.numbers.extend( y )
         response_message.bins.extend( x )
         
@@ -399,15 +379,10 @@ class Model:
         print("(", datetime.now(), ") read message done, time: ", (time2-time1)*1000.0 , "millisec")
 
         # calculate histogram
-        time1 = time.time()
         if (hist_mode==1): # per-cube
             x, y = self.Histogram( 1 )
         else: # hist_mode==2, per-channel
             x, y = self.Histogram( 2 )
-
-        time2 = time.time()
-        print( "(", datetime.now(), ") output hist, time =", (time2-time1)*1000.0 , "millisec",
-                self.x_len*self.y_len*self.z_len/(time2-time1)/1000.0, "px/millisec" )
 
         # set the returning message
         response_message = pb.HistResponse()
@@ -428,7 +403,7 @@ class Model:
 
 
     def ImageArrayModel( self, xmin, ymin, x_len_scaled, y_len_scaled, channel ):
-
+        time1 = time.time()
         image_data_return = self.image_data[channel]
         
         # slice the image
@@ -452,17 +427,18 @@ class Model:
         # rebin
         if ( (self.xmax_slice-self.xmin_slice)>x_screensize_in_px_scaled )|( (self.ymax_slice-self.ymin_slice)>y_screensize_in_px_scaled ):
             print( "rebin" )
-
             image_data_return = np.array( Image.fromarray(image_data_return).resize(size=(x_screensize_in_px_scaled, y_screensize_in_px_scaled)) )
-
             x_rebin_ratio = (x_screensize_in_px_scaled)/(self.xmax_slice-self.xmin_slice)                                
             y_rebin_ratio = (y_screensize_in_px_scaled)/(self.ymax_slice-self.ymin_slice)
         else:
             x_rebin_ratio = 1
             y_rebin_ratio = 1
+        
+        time2 = time.time()
+        print( "(", datetime.now(), ") output array, time =", (time2-time1)*1000.0 , "millisec",
+                self.x_len*self.y_len/(time2-time1)/1000.0, "px/millisec" )
 
         return image_data_return, x_rebin_ratio, y_rebin_ratio
-
 
     def Histogram( self, mode ):
         
@@ -516,18 +492,9 @@ class Model:
 
 
         else: # mode==2, per channel
-            print("cal max")
-            range_max = np.zeros(self.y_len)
-            for i in range(self.y_len):
-                range_max[i] = np.nanmax( self.image_data[self.channel][i] )
-            range_max = np.nanmax( range_max )
-            
-            print("cal min")
-            range_min = np.zeros(self.y_len)
-            for i in range(self.y_len):
-                range_min[i] = np.nanmin( self.image_data[self.channel][i] )
-            range_min = np.nanmin( range_min )
 
+            range_max = np.nanmax( self.image_data[self.channel] )
+            range_min = np.nanmin( self.image_data[self.channel] )
             bin_num = int(np.sqrt(self.x_len*self.y_len))
 
             print(bin_num,range_min,range_max)
@@ -552,25 +519,21 @@ class Server:
         self.start_server = None
 
     def Run( self ):
-
         print( "(", datetime.now(), ") server started (press Ctrl-C to exit the server)" )
         self.loop.run_until_complete( self.start_server )
         self.loop.run_forever()
 
     def Close( self ):
-        
         self.loop.stop()
         print("\n(", datetime.now(), ") exiting the server")
 
     def ConnectClient( self, ws ):
-
         # show the number of clients when new client is connected
         self.client_num += 1
         print("(", datetime.now(), ") established one connection to ", ws.remote_address[0], ",", self.client_num, "client connected")
         print()
 
     def DisconnectClient( self, ws ):
-
         # show the number of clients
         self.client_num -= 1
         print("(", datetime.now(), ") lost connection from ", ws.remote_address[0], ",", self.client_num, "client connected")
@@ -589,10 +552,11 @@ async def OneClientTask( ws, path ):
         print("(", datetime.now(), ") work begin")
 
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5.cube.I.pbcor.fits" )
-        #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits" )
-        model = Model( "HD163296_CO_2_1.fits" )
+        #model = Model( "HD163296_CO_2_1.fits" )
         #model = Model( "S255_IR_sci.spw29.cube.I.pbcor.fits" )
+        model = Model( "GV_Tau_sci.spw0.cube.I.manual.image.pbcor.10ch.fits" )
         
+        #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits" )
         #model = Model( "vla_3ghz_msmf.fits" )
         #model = Model( "mips_24_GO3_sci_10.fits" )
         #model = Model( "cluster_08192.fits" )
