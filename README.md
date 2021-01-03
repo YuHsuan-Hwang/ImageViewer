@@ -1,18 +1,26 @@
 # Image Viewer
 Read and display fits files
-![](https://i.imgur.com/xz9YjZ2.png)
+![](https://i.imgur.com/q2EtFt9.png)
 
 ## Current Features
-* interactive cube data display
-    * focus zooming and panning: rebin the image to screen resolution
-    * image information of the cursor position
+![](https://i.imgur.com/CouzK3w.png)
+* main panel
+    * interactive cube image display
+    * focus zoom and pan
+    * rebin the image to screen resolution
+    * information of the cursor position
     * adjust color scale
     * change image channels
-* interactive image histogram
-    * cube data histogram
-* interactive x,y,z profile of the cursor position
-    * focus zooming and panning
-    * show cursor position
+* histogram panel
+    * interactive image histogram display
+    * focus zoom and pan
+    * cube histogram calculation
+    * color scale settings
+* profile panels
+    * interactive x,y,z profile of the cursor position
+    * focus zoom and pan
+* channel panel
+    * switch channels
 
 ## Issues
 * x axis coordinate is not shown when negative dx is used

@@ -132,7 +132,10 @@ message ChannelResponse {
 
     float x_rebin_ratio = 7;
     float y_rebin_ratio = 8;
-    
+
+    repeated int64 numbers = 9; // data y
+    repeated float bins = 10; // data x
+
 }
 
 message HistResponse {

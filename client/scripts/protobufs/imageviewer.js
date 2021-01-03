@@ -14,6 +14,8 @@ DataProto: imageviewerProto
  * @public
  */
 // GENERATED CODE -- DO NOT EDIT!
+/* eslint-disable */
+// @ts-nocheck
 
 var jspb = require('google-protobuf');
 var goog = jspb;
@@ -1471,12 +1473,12 @@ proto.ImageViewer.InitDisplayResponse.deserializeBinaryFromReader = function(msg
       msg.setYRebinRatio(value);
       break;
     case 18:
-      var value = /** @type {!Array<number>} */ (reader.readPackedInt64());
-      msg.setNumbersList(value);
+        var value = /** @type {!Array<number>} */ (reader.readPackedInt64());
+        msg.setNumbersList(value);
       break;
     case 19:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setBinsList(value);
+        var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
+        msg.setBinsList(value);
       break;
     default:
       reader.skipField();
@@ -2433,8 +2435,8 @@ proto.ImageViewer.ZoomResponse.OneRow.deserializeBinaryFromReader = function(msg
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setPointDataList(value);
+        var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
+        msg.setPointDataList(value);
       break;
     default:
       reader.skipField();
@@ -2765,16 +2767,16 @@ proto.ImageViewer.ProfileResponse.deserializeBinaryFromReader = function(msg, re
       msg.setSendStartTime(value);
       break;
     case 3:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setProfileXList(value);
+        var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
+        msg.setProfileXList(value);
       break;
     case 4:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setProfileYList(value);
+        var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
+        msg.setProfileYList(value);
       break;
     case 5:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setProfileZList(value);
+        var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
+        msg.setProfileZList(value);
       break;
     default:
       reader.skipField();
@@ -2996,7 +2998,7 @@ proto.ImageViewer.ProfileResponse.prototype.clearProfileZList = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.ImageViewer.ChannelResponse.repeatedFields_ = [3,11,12];
+proto.ImageViewer.ChannelResponse.repeatedFields_ = [3,9,10];
 
 
 
@@ -3036,12 +3038,10 @@ proto.ImageViewer.ChannelResponse.toObject = function(includeInstance, msg) {
     channel: jspb.Message.getFieldWithDefault(msg, 4, 0),
     imageWidth: jspb.Message.getFieldWithDefault(msg, 5, 0),
     imageHeight: jspb.Message.getFieldWithDefault(msg, 6, 0),
-    vmin: jspb.Message.getFloatingPointFieldWithDefault(msg, 7, 0.0),
-    vmax: jspb.Message.getFloatingPointFieldWithDefault(msg, 8, 0.0),
-    xRebinRatio: jspb.Message.getFloatingPointFieldWithDefault(msg, 9, 0.0),
-    yRebinRatio: jspb.Message.getFloatingPointFieldWithDefault(msg, 10, 0.0),
-    numbersList: (f = jspb.Message.getRepeatedField(msg, 11)) == null ? undefined : f,
-    binsList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 12)) == null ? undefined : f
+    xRebinRatio: jspb.Message.getFloatingPointFieldWithDefault(msg, 7, 0.0),
+    yRebinRatio: jspb.Message.getFloatingPointFieldWithDefault(msg, 8, 0.0),
+    numbersList: (f = jspb.Message.getRepeatedField(msg, 9)) == null ? undefined : f,
+    binsList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 10)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -3105,25 +3105,17 @@ proto.ImageViewer.ChannelResponse.deserializeBinaryFromReader = function(msg, re
       break;
     case 7:
       var value = /** @type {number} */ (reader.readFloat());
-      msg.setVmin(value);
+      msg.setXRebinRatio(value);
       break;
     case 8:
       var value = /** @type {number} */ (reader.readFloat());
-      msg.setVmax(value);
-      break;
-    case 9:
-      var value = /** @type {number} */ (reader.readFloat());
-      msg.setXRebinRatio(value);
-      break;
-    case 10:
-      var value = /** @type {number} */ (reader.readFloat());
       msg.setYRebinRatio(value);
       break;
-    case 11:
+    case 9:
       var value = /** @type {!Array<number>} */ (reader.readPackedInt64());
       msg.setNumbersList(value);
       break;
-    case 12:
+    case 10:
       var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
       msg.setBinsList(value);
       break;
@@ -3199,45 +3191,31 @@ proto.ImageViewer.ChannelResponse.serializeBinaryToWriter = function(message, wr
       f
     );
   }
-  f = message.getVmin();
+  f = message.getXRebinRatio();
   if (f !== 0.0) {
     writer.writeFloat(
       7,
       f
     );
   }
-  f = message.getVmax();
+  f = message.getYRebinRatio();
   if (f !== 0.0) {
     writer.writeFloat(
       8,
       f
     );
   }
-  f = message.getXRebinRatio();
-  if (f !== 0.0) {
-    writer.writeFloat(
-      9,
-      f
-    );
-  }
-  f = message.getYRebinRatio();
-  if (f !== 0.0) {
-    writer.writeFloat(
-      10,
-      f
-    );
-  }
   f = message.getNumbersList();
   if (f.length > 0) {
     writer.writePackedInt64(
-      11,
+      9,
       f
     );
   }
   f = message.getBinsList();
   if (f.length > 0) {
     writer.writePackedFloat(
-      12,
+      10,
       f
     );
   }
@@ -3321,8 +3299,8 @@ proto.ImageViewer.ChannelResponse.OneRow.deserializeBinaryFromReader = function(
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setPointDataList(value);
+        var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
+        msg.setPointDataList(value);
       break;
     default:
       reader.skipField();
@@ -3529,10 +3507,10 @@ proto.ImageViewer.ChannelResponse.prototype.setImageHeight = function(value) {
 
 
 /**
- * optional float vmin = 7;
+ * optional float x_rebin_ratio = 7;
  * @return {number}
  */
-proto.ImageViewer.ChannelResponse.prototype.getVmin = function() {
+proto.ImageViewer.ChannelResponse.prototype.getXRebinRatio = function() {
   return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 7, 0.0));
 };
 
@@ -3541,16 +3519,16 @@ proto.ImageViewer.ChannelResponse.prototype.getVmin = function() {
  * @param {number} value
  * @return {!proto.ImageViewer.ChannelResponse} returns this
  */
-proto.ImageViewer.ChannelResponse.prototype.setVmin = function(value) {
+proto.ImageViewer.ChannelResponse.prototype.setXRebinRatio = function(value) {
   return jspb.Message.setProto3FloatField(this, 7, value);
 };
 
 
 /**
- * optional float vmax = 8;
+ * optional float y_rebin_ratio = 8;
  * @return {number}
  */
-proto.ImageViewer.ChannelResponse.prototype.getVmax = function() {
+proto.ImageViewer.ChannelResponse.prototype.getYRebinRatio = function() {
   return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 8, 0.0));
 };
 
@@ -3559,53 +3537,17 @@ proto.ImageViewer.ChannelResponse.prototype.getVmax = function() {
  * @param {number} value
  * @return {!proto.ImageViewer.ChannelResponse} returns this
  */
-proto.ImageViewer.ChannelResponse.prototype.setVmax = function(value) {
+proto.ImageViewer.ChannelResponse.prototype.setYRebinRatio = function(value) {
   return jspb.Message.setProto3FloatField(this, 8, value);
 };
 
 
 /**
- * optional float x_rebin_ratio = 9;
- * @return {number}
- */
-proto.ImageViewer.ChannelResponse.prototype.getXRebinRatio = function() {
-  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 9, 0.0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.ImageViewer.ChannelResponse} returns this
- */
-proto.ImageViewer.ChannelResponse.prototype.setXRebinRatio = function(value) {
-  return jspb.Message.setProto3FloatField(this, 9, value);
-};
-
-
-/**
- * optional float y_rebin_ratio = 10;
- * @return {number}
- */
-proto.ImageViewer.ChannelResponse.prototype.getYRebinRatio = function() {
-  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 10, 0.0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.ImageViewer.ChannelResponse} returns this
- */
-proto.ImageViewer.ChannelResponse.prototype.setYRebinRatio = function(value) {
-  return jspb.Message.setProto3FloatField(this, 10, value);
-};
-
-
-/**
- * repeated int64 numbers = 11;
+ * repeated int64 numbers = 9;
  * @return {!Array<number>}
  */
 proto.ImageViewer.ChannelResponse.prototype.getNumbersList = function() {
-  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedField(this, 11));
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedField(this, 9));
 };
 
 
@@ -3614,7 +3556,7 @@ proto.ImageViewer.ChannelResponse.prototype.getNumbersList = function() {
  * @return {!proto.ImageViewer.ChannelResponse} returns this
  */
 proto.ImageViewer.ChannelResponse.prototype.setNumbersList = function(value) {
-  return jspb.Message.setField(this, 11, value || []);
+  return jspb.Message.setField(this, 9, value || []);
 };
 
 
@@ -3624,7 +3566,7 @@ proto.ImageViewer.ChannelResponse.prototype.setNumbersList = function(value) {
  * @return {!proto.ImageViewer.ChannelResponse} returns this
  */
 proto.ImageViewer.ChannelResponse.prototype.addNumbers = function(value, opt_index) {
-  return jspb.Message.addToRepeatedField(this, 11, value, opt_index);
+  return jspb.Message.addToRepeatedField(this, 9, value, opt_index);
 };
 
 
@@ -3638,11 +3580,11 @@ proto.ImageViewer.ChannelResponse.prototype.clearNumbersList = function() {
 
 
 /**
- * repeated float bins = 12;
+ * repeated float bins = 10;
  * @return {!Array<number>}
  */
 proto.ImageViewer.ChannelResponse.prototype.getBinsList = function() {
-  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 12));
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 10));
 };
 
 
@@ -3651,7 +3593,7 @@ proto.ImageViewer.ChannelResponse.prototype.getBinsList = function() {
  * @return {!proto.ImageViewer.ChannelResponse} returns this
  */
 proto.ImageViewer.ChannelResponse.prototype.setBinsList = function(value) {
-  return jspb.Message.setField(this, 12, value || []);
+  return jspb.Message.setField(this, 10, value || []);
 };
 
 
@@ -3661,7 +3603,7 @@ proto.ImageViewer.ChannelResponse.prototype.setBinsList = function(value) {
  * @return {!proto.ImageViewer.ChannelResponse} returns this
  */
 proto.ImageViewer.ChannelResponse.prototype.addBins = function(value, opt_index) {
-  return jspb.Message.addToRepeatedField(this, 12, value, opt_index);
+  return jspb.Message.addToRepeatedField(this, 10, value, opt_index);
 };
 
 

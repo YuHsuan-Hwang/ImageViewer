@@ -336,7 +336,7 @@ class Model:
         for j in range( image_data_return.shape[0] ):
             row_data = response_message.image_data.add()
             row_data.point_data.extend( image_data_return[j] )
-		
+        print(image_data_return)
         response_message.channel = self.channel
         response_message.image_width  = image_data_return.shape[0]
         response_message.image_height = image_data_return.shape[1]
@@ -552,9 +552,9 @@ async def OneClientTask( ws, path ):
         print("(", datetime.now(), ") work begin")
 
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5.cube.I.pbcor.fits" )
-        #model = Model( "HD163296_CO_2_1.fits" )
+        model = Model( "HD163296_CO_2_1.fits" )
         #model = Model( "S255_IR_sci.spw29.cube.I.pbcor.fits" )
-        model = Model( "GV_Tau_sci.spw0.cube.I.manual.image.pbcor.10ch.fits" )
+        #model = Model( "GV_Tau_sci.spw0.cube.I.manual.image.pbcor.10ch.fits" )
         
         #model = Model( "member.uid___A001_X12a2_X10d._COS850.0005__sci.spw5_7_9_11.cont.I.pbcor.fits" )
         #model = Model( "vla_3ghz_msmf.fits" )

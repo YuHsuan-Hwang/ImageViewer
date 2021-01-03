@@ -263,8 +263,8 @@ class Controller{
 
     ZoomEvent( event, ws ) {
         // trigger zooming after the new zoomed image is plotted
-        if( (this.relayout_call)&&(event["xaxis.range"][0]!=this.view.x_range_min)&&(event["xaxis.range"][1]!=this.view.x_range_max)
-                                &&(event["yaxis.range"][0]!=this.view.y_range_min)&&(event["yaxis.range"][1]!=this.view.y_range_max) ) {
+        if( (this.relayout_call)&&( (event["xaxis.range"][0]!=this.view.x_range_min)||(event["xaxis.range"][1]!=this.view.x_range_max)
+                                  ||(event["yaxis.range"][0]!=this.view.y_range_min)||(event["yaxis.range"][1]!=this.view.y_range_max) ) ) {
             
             // close mouse event
             this.hover_function_call = false;
@@ -772,11 +772,13 @@ class Controller{
         this.height = return_message.getImageHeight();
         this.view.channel = return_message.getChannel();
         console.log(new Date(),"channel: ", this.view.channel )
-        let data = new Array(this.view.height);
-        for (let i=0; i<this.height; i++) {
+        
+        let data = new Array(this.view.width);
+        for (let i=0; i<this.width; i++) {
             data[i] = return_message.getImageDataList()[i].getPointDataList();
         }
         this.view.image_data[return_message.getChannel()] = data;
+        console.log(new Date(),"image data: ", data )
 
         //this.view.hist_data    = return_message.getHistDataList();
         this.view.hist_data_y = return_message.getNumbersList();

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x11imageviewer.proto\x12\x0bImageViewer\"e\n\x12InitDisplayRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x1a\n\x12x_screensize_in_px\x18\x02 \x01(\x05\x12\x1a\n\x12y_screensize_in_px\x18\x03 \x01(\x05\"r\n\x0bZoomRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\x12\x0c\n\x04xmin\x18\x03 \x01(\x05\x12\x0c\n\x04ymin\x18\x04 \x01(\x05\x12\r\n\x05width\x18\x05 \x01(\x05\x12\x0e\n\x06height\x18\x06 \x01(\x05\"b\n\x0eProfileRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\x12\x12\n\nposition_x\x18\x03 \x01(\x05\x12\x12\n\nposition_y\x18\x04 \x01(\x05\":\n\x0e\x43hannelRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\"9\n\x0bHistRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x11\n\thist_mode\x18\x02 \x01(\x05\"\xd2\x03\n\x13InitDisplayResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\x12\x12\n\norig_width\x18\x04 \x01(\x05\x12\x13\n\x0borig_height\x18\x05 \x01(\x05\x12\x13\n\x0b\x63hannel_num\x18\x06 \x01(\x05\x12;\n\nimage_data\x18\t \x03(\x0b\x32\'.ImageViewer.InitDisplayResponse.OneRow\x12\x13\n\x0bimage_width\x18\n \x01(\x05\x12\x14\n\x0cimage_height\x18\x0b \x01(\x05\x12\x17\n\x0forig_x_coor_min\x18\x0c \x01(\x02\x12\x19\n\x11orig_x_coor_delta\x18\r \x01(\x02\x12\x17\n\x0forig_y_coor_min\x18\x0e \x01(\x02\x12\x19\n\x11orig_y_coor_delta\x18\x0f \x01(\x02\x12\x15\n\rx_rebin_ratio\x18\x10 \x01(\x02\x12\x15\n\ry_rebin_ratio\x18\x11 \x01(\x02\x12\x0f\n\x07numbers\x18\x12 \x03(\x03\x12\x0c\n\x04\x62ins\x18\x13 \x03(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"\xfe\x01\n\x0cZoomResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x34\n\nimage_data\x18\x03 \x03(\x0b\x32 .ImageViewer.ZoomResponse.OneRow\x12\x0f\n\x07\x63hannel\x18\x04 \x01(\x05\x12\x13\n\x0bimage_width\x18\x05 \x01(\x05\x12\x14\n\x0cimage_height\x18\x06 \x01(\x05\x12\x15\n\rx_rebin_ratio\x18\x07 \x01(\x02\x12\x15\n\ry_rebin_ratio\x18\x08 \x01(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"|\n\x0fProfileResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x11\n\tprofile_x\x18\x03 \x03(\x02\x12\x11\n\tprofile_y\x18\x04 \x03(\x02\x12\x11\n\tprofile_z\x18\x05 \x03(\x02\"\xbf\x02\n\x0f\x43hannelResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x37\n\nimage_data\x18\x03 \x03(\x0b\x32#.ImageViewer.ChannelResponse.OneRow\x12\x0f\n\x07\x63hannel\x18\x04 \x01(\x05\x12\x13\n\x0bimage_width\x18\x05 \x01(\x05\x12\x14\n\x0cimage_height\x18\x06 \x01(\x05\x12\x0c\n\x04vmin\x18\x07 \x01(\x02\x12\x0c\n\x04vmax\x18\x08 \x01(\x02\x12\x15\n\rx_rebin_ratio\x18\t \x01(\x02\x12\x15\n\ry_rebin_ratio\x18\n \x01(\x02\x12\x0f\n\x07numbers\x18\x0b \x03(\x03\x12\x0c\n\x04\x62ins\x18\x0c \x03(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"_\n\x0cHistResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x0f\n\x07numbers\x18\x03 \x03(\x03\x12\x0c\n\x04\x62ins\x18\x04 \x03(\x02*\\\n\tEventType\x12\x0f\n\x0b\x45MPTY_EVENT\x10\x00\x12\x10\n\x0cINIT_DISPLAY\x10\x01\x12\x08\n\x04ZOOM\x10\x02\x12\x0b\n\x07PROFILE\x10\x03\x12\x0b\n\x07\x43HANNEL\x10\x04\x12\x08\n\x04HIST\x10\x05\x62\x06proto3'
+  serialized_pb=b'\n\x11imageviewer.proto\x12\x0bImageViewer\"e\n\x12InitDisplayRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x1a\n\x12x_screensize_in_px\x18\x02 \x01(\x05\x12\x1a\n\x12y_screensize_in_px\x18\x03 \x01(\x05\"r\n\x0bZoomRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\x12\x0c\n\x04xmin\x18\x03 \x01(\x05\x12\x0c\n\x04ymin\x18\x04 \x01(\x05\x12\r\n\x05width\x18\x05 \x01(\x05\x12\x0e\n\x06height\x18\x06 \x01(\x05\"b\n\x0eProfileRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\x12\x12\n\nposition_x\x18\x03 \x01(\x05\x12\x12\n\nposition_y\x18\x04 \x01(\x05\":\n\x0e\x43hannelRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x0f\n\x07\x63hannel\x18\x02 \x01(\x05\"9\n\x0bHistRequest\x12\x17\n\x0fsend_start_time\x18\x01 \x01(\x03\x12\x11\n\thist_mode\x18\x02 \x01(\x05\"\xd2\x03\n\x13InitDisplayResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\x12\x12\n\norig_width\x18\x04 \x01(\x05\x12\x13\n\x0borig_height\x18\x05 \x01(\x05\x12\x13\n\x0b\x63hannel_num\x18\x06 \x01(\x05\x12;\n\nimage_data\x18\t \x03(\x0b\x32\'.ImageViewer.InitDisplayResponse.OneRow\x12\x13\n\x0bimage_width\x18\n \x01(\x05\x12\x14\n\x0cimage_height\x18\x0b \x01(\x05\x12\x17\n\x0forig_x_coor_min\x18\x0c \x01(\x02\x12\x19\n\x11orig_x_coor_delta\x18\r \x01(\x02\x12\x17\n\x0forig_y_coor_min\x18\x0e \x01(\x02\x12\x19\n\x11orig_y_coor_delta\x18\x0f \x01(\x02\x12\x15\n\rx_rebin_ratio\x18\x10 \x01(\x02\x12\x15\n\ry_rebin_ratio\x18\x11 \x01(\x02\x12\x0f\n\x07numbers\x18\x12 \x03(\x03\x12\x0c\n\x04\x62ins\x18\x13 \x03(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"\xfe\x01\n\x0cZoomResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x34\n\nimage_data\x18\x03 \x03(\x0b\x32 .ImageViewer.ZoomResponse.OneRow\x12\x0f\n\x07\x63hannel\x18\x04 \x01(\x05\x12\x13\n\x0bimage_width\x18\x05 \x01(\x05\x12\x14\n\x0cimage_height\x18\x06 \x01(\x05\x12\x15\n\rx_rebin_ratio\x18\x07 \x01(\x02\x12\x15\n\ry_rebin_ratio\x18\x08 \x01(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"|\n\x0fProfileResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x11\n\tprofile_x\x18\x03 \x03(\x02\x12\x11\n\tprofile_y\x18\x04 \x03(\x02\x12\x11\n\tprofile_z\x18\x05 \x03(\x02\"\xa3\x02\n\x0f\x43hannelResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x37\n\nimage_data\x18\x03 \x03(\x0b\x32#.ImageViewer.ChannelResponse.OneRow\x12\x0f\n\x07\x63hannel\x18\x04 \x01(\x05\x12\x13\n\x0bimage_width\x18\x05 \x01(\x05\x12\x14\n\x0cimage_height\x18\x06 \x01(\x05\x12\x15\n\rx_rebin_ratio\x18\x07 \x01(\x02\x12\x15\n\ry_rebin_ratio\x18\x08 \x01(\x02\x12\x0f\n\x07numbers\x18\t \x03(\x03\x12\x0c\n\x04\x62ins\x18\n \x03(\x02\x1a\x1c\n\x06OneRow\x12\x12\n\npoint_data\x18\x01 \x03(\x02\"_\n\x0cHistResponse\x12\x17\n\x0ftask_start_time\x18\x01 \x01(\x03\x12\x17\n\x0fsend_start_time\x18\x02 \x01(\x03\x12\x0f\n\x07numbers\x18\x03 \x03(\x03\x12\x0c\n\x04\x62ins\x18\x04 \x03(\x02*\\\n\tEventType\x12\x0f\n\x0b\x45MPTY_EVENT\x10\x00\x12\x10\n\x0cINIT_DISPLAY\x10\x01\x12\x08\n\x04ZOOM\x10\x02\x12\x0b\n\x07PROFILE\x10\x03\x12\x0b\n\x07\x43HANNEL\x10\x04\x12\x08\n\x04HIST\x10\x05\x62\x06proto3'
 )
 
 _EVENTTYPE = _descriptor.EnumDescriptor(
@@ -63,8 +63,8 @@ _EVENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1743,
-  serialized_end=1835,
+  serialized_start=1715,
+  serialized_end=1807,
 )
 _sym_db.RegisterEnumDescriptor(_EVENTTYPE)
 
@@ -751,43 +751,29 @@ _CHANNELRESPONSE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='vmin', full_name='ImageViewer.ChannelResponse.vmin', index=6,
+      name='x_rebin_ratio', full_name='ImageViewer.ChannelResponse.x_rebin_ratio', index=6,
       number=7, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='vmax', full_name='ImageViewer.ChannelResponse.vmax', index=7,
+      name='y_rebin_ratio', full_name='ImageViewer.ChannelResponse.y_rebin_ratio', index=7,
       number=8, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='x_rebin_ratio', full_name='ImageViewer.ChannelResponse.x_rebin_ratio', index=8,
-      number=9, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y_rebin_ratio', full_name='ImageViewer.ChannelResponse.y_rebin_ratio', index=9,
-      number=10, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='numbers', full_name='ImageViewer.ChannelResponse.numbers', index=10,
-      number=11, type=3, cpp_type=2, label=3,
+      name='numbers', full_name='ImageViewer.ChannelResponse.numbers', index=8,
+      number=9, type=3, cpp_type=2, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='bins', full_name='ImageViewer.ChannelResponse.bins', index=11,
-      number=12, type=2, cpp_type=6, label=3,
+      name='bins', full_name='ImageViewer.ChannelResponse.bins', index=9,
+      number=10, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -805,7 +791,7 @@ _CHANNELRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1325,
-  serialized_end=1644,
+  serialized_end=1616,
 )
 
 
@@ -857,8 +843,8 @@ _HISTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1646,
-  serialized_end=1741,
+  serialized_start=1618,
+  serialized_end=1713,
 )
 
 _INITDISPLAYRESPONSE_ONEROW.containing_type = _INITDISPLAYRESPONSE
