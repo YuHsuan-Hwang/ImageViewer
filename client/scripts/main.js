@@ -93,7 +93,7 @@ class View{
             shapes:[{type:'line',x0:0.01, x1:0.01,y0:0, y1:1,yref:'paper',line:{color:'lightpink', width:1}}, // line for max
                     {type:'line',x0:-0.01,x1:-0.01,y0:0,y1:1,yref:'paper',line:{color:'lightgreen',width:1}}] // line for min
         }
-        Plotly.react( this.div_hist, [{y:[], type:'bar',opacity: 0.4}], hist_layout, {displayModeBar:false,displaylogo:false});
+        Plotly.react( this.div_hist, [{y:[], type:'bar',opacity: 0.4}], hist_layout, {displayModeBar:false,displaylogo:false,scrollZoom:true});
 
         // setup x, y, z profile panels
         let bar_layout_x = {

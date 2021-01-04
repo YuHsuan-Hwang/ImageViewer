@@ -3,7 +3,7 @@ Read and display fits files
 ![](https://i.imgur.com/q2EtFt9.png)
 
 ## Current Features
-![](https://i.imgur.com/CouzK3w.png)
+![](https://i.imgur.com/5p3iGTN.png)
 * main panel
     * interactive cube image display
     * focus zoom and pan
